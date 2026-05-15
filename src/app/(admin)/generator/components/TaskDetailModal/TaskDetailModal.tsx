@@ -70,28 +70,17 @@ export default function TaskDetailModal({
 }: TaskDetailModalProps) {
   const [task, setTask] = useState<TaskDetailData | null>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"flow" | "details" | "results">("flow");
 
-  // Fetch task details
   const fetchTaskDetails = useCallback(async () => {
     if (!taskId) return;
 
     setLoading(true);
-    setError(null);
 
-    try {
-      const response = await fetch(`${API_URL}/api/status/${taskId}`);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch task: ${response.statusText}`);
-      }
-      const data = await response.json();
-      setTask(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Unknown error");
-    } finally {
-      setLoading(false);
-    }
+    const response = await fetch(`${API_URL}/api/status/${taskId}`);
+    const data = await response.json();
+    setTask(data);
+    setLoading(false);
   }, [taskId]);
 
   // Fetch when modal opens
@@ -157,7 +146,7 @@ export default function TaskDetailModal({
   };
 
   const formatDate = (dateStr?: string) => {
-    if (!dateStr) return "N/A";
+    if (!dateStr) return "";
     return new Date(dateStr).toLocaleString();
   };
 
@@ -254,19 +243,6 @@ export default function TaskDetailModal({
                   <p className="text-gray-500 dark:text-gray-400">
                     Loading task details...
                   </p>
-                </div>
-              </div>
-            ) : error ? (
-              <div className="flex items-center justify-center py-20">
-                <div className="text-center">
-                  <p className="text-red-500 mb-2">❌ Error loading task</p>
-                  <p className="text-gray-500 dark:text-gray-400">{error}</p>
-                  <button
-                    onClick={fetchTaskDetails}
-                    className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-                  >
-                    Retry
-                  </button>
                 </div>
               </div>
             ) : (

@@ -19,15 +19,9 @@ export default function GalleryPage() {
   }, []);
 
   const fetchGallery = async () => {
-    try {
-      const response = await fetch(`${API_URL}/api/gallery`);
-      const data = await response.json();
-      setItems(data);
-    } catch (error) {
-      console.error("Error fetching gallery:", error);
-    } finally {
-      setLoading(false);
-    }
+    const response = await fetch(`${API_URL}/api/gallery`);
+    const data = await response.json();
+    setItems(data);
   };
 
   const handleViewDetails = (item: GalleryItem) => {

@@ -95,40 +95,30 @@ export default function ChatInterface({ onGenerate }: { onGenerate: (spec: any) 
     setInput("");
     setIsLoading(true);
 
-    try {
-      const response = await fetch(`${API_URL}/api/chatbot`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: input }),
-      });
+    const response = await fetch(`${API_URL}/api/chatbot`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt: input }),
+    });
 
-      const data = await response.json();
+    const data = await response.json();
 
-      const assistantMessage: ChatMessage = {
-        id: `assistant_${Date.now()}`,
-        role: "assistant",
-        content: data.message || data.success
-          ? `Sempurna! Saya telah memproses deskripsi Anda.\n\n📋 **Ringkasan:**\n• **Nama:** ${data.parsed_info?.project_name || "Building Project"}\n• **Style:** ${data.parsed_info?.style || "modern"}\n• **Lantai:** ${data.parsed_info?.floors || 1}\n• **Lokasi:** ${data.parsed_info?.location?.name || "Belum指定"}\n• **Luas:** ~${Math.round(data.parsed_info?.total_area || 120)}m²\n\n🏠 **Ruangan:**\n${formatRooms(data.parsed_info?.rooms || [])}\n\nKlik tombol **Generate** di bawah untuk memulai pembuatan model IFC.`
-          : `Maaf, saya tidak dapat memproses permintaan Anda: ${data.message}`,
-        parsed_info: data.parsed_info,
-        specification: data.specification,
-      };
+    const assistantMessage: ChatMessage = {
+      id: `assistant_${Date.now()}`,
+      role: "assistant",
+      content: data.message || data.success
+        ? `Sempurna! Saya telah memproses deskripsi Anda.\n\n📋 **Ringkasan:**\n• **Nama:** ${data.parsed_info?.project_name || ""}\n• **Style:** ${data.parsed_info?.style || ""}\n• **Lantai:** ${data.parsed_info?.floors || ""}\n• **Lokasi:** ${data.parsed_info?.location?.name || ""}\n• **Luas:** ~${Math.round(data.parsed_info?.total_area)}m²\n\n🏠 **Ruangan:**\n${formatRooms(data.parsed_info?.rooms)}\n\nKlik tombol **Generate** di bawah untuk memulai pembuatan model IFC.`
+        : `Maaf, saya tidak dapat memproses permintaan Anda: ${data.message}`,
+      parsed_info: data.parsed_info,
+      specification: data.specification,
+    };
 
-      setMessages((prev) => [...prev, assistantMessage]);
-    } catch (error) {
-      const errorMessage: ChatMessage = {
-        id: `error_${Date.now()}`,
-        role: "assistant",
-        content: "Maaf, terjadi kesalahan saat memproses permintaan Anda. Silakan coba lagi.",
-      };
-      setMessages((prev) => [...prev, errorMessage]);
-    } finally {
-      setIsLoading(false);
-    }
+    setMessages((prev) => [...prev, assistantMessage]);
+    setIsLoading(false);
   };
 
-  const formatRooms = (rooms: any[]) => {
-    if (!rooms.length) return "• (tidak ada ruangan yang spesifik)";
+  const formatRooms = (rooms: any[] | undefined) => {
+    if (!rooms || !rooms.length) return "• (tidak ada ruangan yang spesifik)";
 
     const counts: Record<string, number> = {};
     rooms.forEach((r) => {

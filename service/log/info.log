@@ -1,111 +1,18 @@
-2026-05-15 21:27:57,224 - root - INFO - Logging configured. INFO -> info.log, WARNING+ -> error.log
-2026-05-15 21:27:57,224 - app.main - INFO - Starting up with output dir: /home/nodesemesta/dev/Arsitektur/service/outputs
-2026-05-15 21:27:57,224 - app.core.agent_registry - INFO - Registered agent: CoordinatorAgent with capabilities: CoordinatorAgent
-2026-05-15 21:27:57,225 - app.core.agent_registry - INFO - Registered agent: ArchitectAgent with capabilities: ArchitectAgent
-2026-05-15 21:27:57,225 - app.core.agent_registry - INFO - Registered agent: IFCGeometryAgentV2 with capabilities: IFCGeometryAgentV2
-2026-05-15 21:27:57,225 - app.core.agent_registry - INFO - Registered agent: RenderAgent with capabilities: RenderAgent
-2026-05-15 21:27:57,225 - app.main - INFO - Registered 4 agents
-2026-05-15 21:27:57,225 - app.main - INFO - ArchitectAgent initialized from registry (with CoordinatorAgent dependency)
-2026-05-15 21:27:57,225 - app.main - INFO - IFCGeometryAgent initialized from registry
-2026-05-15 21:27:57,225 - app.main - INFO - RenderAgent initialized from registry
-2026-05-15 21:27:57,225 - app.main - INFO - Subscribed to agent events for WebSocket broadcasting
-2026-05-15 21:29:55,211 - app.main - INFO - [TASK] Running ArchitectAgent (LLM-driven)... task_id=7951e975-5eb3-47ff-8a8f-95ef041eb48c
-2026-05-15 21:29:55,211 - app.agents.base - INFO - [ArchitectAgent] Step 1: Converting structured specification to ProjectBrief...
-2026-05-15 21:29:55,212 - app.agents.base - INFO - [ArchitectAgent] Project brief created: Rumah Keluarga Bandung, 2 floors, style: modern
-2026-05-15 21:29:55,212 - app.agents.base - INFO - [ArchitectAgent] Step 2: Environment analysis (querying ClimateAPI)...
-2026-05-15 21:29:55,212 - app.agents.environment_agent - INFO - [EnvironmentAgent] Querying climate data for Bandung...
-2026-05-15 21:29:56,168 - httpx - INFO - HTTP Request: GET https://archive-api.open-meteo.com/v1/archive?latitude=-6.9175&longitude=107.6191&start_date=2023-01-01&end_date=2023-12-31&daily=temperature_2m_max%2Ctemperature_2m_min%2Cprecipitation_sum%2Crelative_humidity_2m_mean%2Cwindspeed_10m_mean%2Cshortwave_radiation_sum "HTTP/1.1 200 OK"
-2026-05-15 21:29:56,171 - app.agents.environment_agent - INFO - [EnvironmentAgent] Generating building codes via LLM...
-2026-05-15 21:30:08,738 - httpx - INFO - HTTP Request: POST https://us-central1-aiplatform.googleapis.com/v1/projects/project-ac920b8b-9938-4e81-b93/locations/us-central1/publishers/google/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
-2026-05-15 21:30:08,745 - app.agents.environment_agent - INFO - [EnvironmentAgent] Environment analysis complete for Bandung
-2026-05-15 21:30:08,746 - app.agents.environment_agent - INFO - [EnvironmentAgent] Climate zone: tropical savanna
-2026-05-15 21:30:08,746 - app.agents.environment_agent - INFO - [EnvironmentAgent] Annual rainfall: 1420.9mm
-2026-05-15 21:30:08,746 - app.agents.base - INFO - [ArchitectAgent] Step 3: Requesting layout from Coordinator Agent...
-2026-05-15 21:30:08,746 - app.agents.base - INFO - [CoordinatorAgent] Generating layout...
-2026-05-15 21:30:08,747 - app.agents.base - INFO - [CoordinatorAgent] Generating architectural params...
-2026-05-15 21:30:30,858 - httpx - INFO - HTTP Request: POST https://us-central1-aiplatform.googleapis.com/v1/projects/project-ac920b8b-9938-4e81-b93/locations/us-central1/publishers/google/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
-2026-05-15 21:30:30,860 - app.agents.base - INFO - [CoordinatorAgent] Selecting materials...
-2026-05-15 21:30:44,896 - httpx - INFO - HTTP Request: POST https://us-central1-aiplatform.googleapis.com/v1/projects/project-ac920b8b-9938-4e81-b93/locations/us-central1/publishers/google/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
-2026-05-15 21:30:44,898 - app.agents.base - INFO - [CoordinatorAgent] Generating roof...
-2026-05-15 21:31:06,870 - httpx - INFO - HTTP Request: POST https://us-central1-aiplatform.googleapis.com/v1/projects/project-ac920b8b-9938-4e81-b93/locations/us-central1/publishers/google/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
-2026-05-15 21:31:06,875 - app.agents.base - INFO - [CoordinatorAgent] Optimizing layout...
-2026-05-15 21:31:25,435 - httpx - INFO - HTTP Request: POST https://us-central1-aiplatform.googleapis.com/v1/projects/project-ac920b8b-9938-4e81-b93/locations/us-central1/publishers/google/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
-2026-05-15 21:31:25,441 - app.agents.base - INFO - [CoordinatorAgent] Generating layout with LLM...
-2026-05-15 21:33:02,850 - httpx - INFO - HTTP Request: POST https://us-central1-aiplatform.googleapis.com/v1/projects/project-ac920b8b-9938-4e81-b93/locations/us-central1/publishers/google/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
-2026-05-15 21:33:02,852 - app.agents.base - INFO - [CoordinatorAgent] Generating complete floor data with walls...
-2026-05-15 21:33:02,859 - app.agents.base - INFO - [ArchitectAgent] Layout generated: 8 spaces positioned
-2026-05-15 21:33:02,859 - app.agents.base - INFO - [ArchitectAgent] Step 4: Spawning space agents with layout specification...
-2026-05-15 21:33:02,859 - app.agents.base - INFO - [ArchitectAgent] Spawning 8 space agents with layout...
-2026-05-15 21:33:02,860 - app.agents.base - INFO - [ArchitectAgent] [living_room_0] Starting with position (-2.0, 2.5)...
-2026-05-15 21:33:02,860 - app.agents.base - INFO - [Living_roomAgent] Calling LLM for Ruang Tamu design...
-2026-05-15 21:33:02,869 - app.agents.base - INFO - [ArchitectAgent] [dining_room_0] Starting with position (1.75, 3.0)...
-2026-05-15 21:33:02,877 - app.agents.base - INFO - [ArchitectAgent] [kitchen_0] Starting with position (2.0, -0.5)...
-2026-05-15 21:33:02,877 - app.agents.base - INFO - [KitchenAgent] Calling LLM for Dapur design...
-2026-05-15 21:33:02,885 - app.agents.base - INFO - [ArchitectAgent] [bedroom_0] Starting with position (2.5, 2.75)...
-2026-05-15 21:33:02,886 - root - INFO - [BEDROOM_AGENT_DEBUG] Received args: brief=project_id=None project_type=<ProjectType.RESIDENTIAL: 'residential'> residential_type=None title='Rumah Keluarga Bandung' description='' requirements=[] desired_features=['Bandung, Indonesia'] constraints=['entrance_position: front_center', 'kitchen_location: rear', 'master_bedroom_location: rear_corner'] budget_range=None target_completion=None style_preference='modern' floor_count=2 approximate_area=None room_requirements={'living_room': RoomRequirement(count=1, min_area_m2=20.0, max_area_m2=None, features=[]), 'dining_room': RoomRequirement(count=1, min_area_m2=14.0, max_area_m2=None, features=[]), 'kitchen': RoomRequirement(count=1, min_area_m2=9.0, max_area_m2=None, features=[]), 'bedroom': RoomRequirement(count=2, min_area_m2=10.5, max_area_m2=None, features=[]), 'master_bedroom': RoomRequirement(count=1, min_area_m2=18.0, max_area_m2=None, features=[]), 'bathroom': RoomRequirement(count=2, min_area_m2=4.0, max_area_m2=None, features=[])} notes=[] architectural_params=ArchitecturalParameters(floor_height_ground=3.5, floor_height_upper=3.2, floor_to_ceiling=3.0, slab_thickness=0.15, wall_thickness_exterior=0.3, wall_thickness_interior=0.2, roof_overhang=0.6, roof_thickness=0.15, room_width=3.25, room_length=3.6666666666666665, corridor_width=1.2, staircase_width=1.2, building_width=4.0, building_depth=5.0, foundation_type='shallow', structural_system='frame') site_params=SiteParameters(plot_area=150.0, plot_width=8.0, plot_length=10.0, orientation=None, topography=None, soil_type=None, access_direction=None, setback_front=2.0, setback_back=3.0, setback_left=2.0, setback_right=2.0), context_keys=['specification', 'project_brief', 'environment_context', 'ifc_site_parameters', 'layout_spec', 'arch_params', 'materials', 'roof', 'layout_optimization', 'floors_data', 'wall_bounds_by_space', 'layout_config', 'target_floor', '_layout_space_type'], position={'center_x': 2.5, 'center_y': 2.75, 'floor_number': 2, 'wall_bounds': {'floor_number': 2, 'center_x': 2.5, 'center_y': 2.75, 'width': 3.0, 'length': 3.5, 'bounds': {'north': 4.5, 'south': 1.0, 'east': 4.0, 'west': 1.0}, 'relative': {'north_offset': 0.0, 'south_offset': 0.0, 'east_offset': 0.0, 'west_offset': 0.0}}}, dimensions={'width_m': 3.0, 'length_m': 3.5, 'height_m': 3.5}
-2026-05-15 21:33:02,886 - app.agents.base - INFO - [BedroomAgent] Calling LLM for Kamar Tidur 0 interior design...
-2026-05-15 21:33:02,895 - app.agents.base - INFO - [ArchitectAgent] [bedroom_1] Starting with position (2.5, -2.75)...
-2026-05-15 21:33:02,896 - root - INFO - [BEDROOM_AGENT_DEBUG] Received args: brief=project_id=None project_type=<ProjectType.RESIDENTIAL: 'residential'> residential_type=None title='Rumah Keluarga Bandung' description='' requirements=[] desired_features=['Bandung, Indonesia'] constraints=['entrance_position: front_center', 'kitchen_location: rear', 'master_bedroom_location: rear_corner'] budget_range=None target_completion=None style_preference='modern' floor_count=2 approximate_area=None room_requirements={'living_room': RoomRequirement(count=1, min_area_m2=20.0, max_area_m2=None, features=[]), 'dining_room': RoomRequirement(count=1, min_area_m2=14.0, max_area_m2=None, features=[]), 'kitchen': RoomRequirement(count=1, min_area_m2=9.0, max_area_m2=None, features=[]), 'bedroom': RoomRequirement(count=2, min_area_m2=10.5, max_area_m2=None, features=[]), 'master_bedroom': RoomRequirement(count=1, min_area_m2=18.0, max_area_m2=None, features=[]), 'bathroom': RoomRequirement(count=2, min_area_m2=4.0, max_area_m2=None, features=[])} notes=[] architectural_params=ArchitecturalParameters(floor_height_ground=3.5, floor_height_upper=3.2, floor_to_ceiling=3.0, slab_thickness=0.15, wall_thickness_exterior=0.3, wall_thickness_interior=0.2, roof_overhang=0.6, roof_thickness=0.15, room_width=3.25, room_length=3.6666666666666665, corridor_width=1.2, staircase_width=1.2, building_width=4.0, building_depth=5.0, foundation_type='shallow', structural_system='frame') site_params=SiteParameters(plot_area=150.0, plot_width=8.0, plot_length=10.0, orientation=None, topography=None, soil_type=None, access_direction=None, setback_front=2.0, setback_back=3.0, setback_left=2.0, setback_right=2.0), context_keys=['specification', 'project_brief', 'environment_context', 'ifc_site_parameters', 'layout_spec', 'arch_params', 'materials', 'roof', 'layout_optimization', 'floors_data', 'wall_bounds_by_space', 'layout_config', 'target_floor', '_layout_space_type'], position={'center_x': 2.5, 'center_y': -2.75, 'floor_number': 2, 'wall_bounds': {'floor_number': 2, 'center_x': 2.5, 'center_y': -2.75, 'width': 3.0, 'length': 3.5, 'bounds': {'north': -1.0, 'south': -4.5, 'east': 4.0, 'west': 1.0}, 'relative': {'north_offset': 0.0, 'south_offset': 0.0, 'east_offset': 0.0, 'west_offset': 0.0}}}, dimensions={'width_m': 3.0, 'length_m': 3.5, 'height_m': 3.5}
-2026-05-15 21:33:02,896 - app.agents.base - INFO - [BedroomAgent_1] Calling LLM for Kamar Tidur 1 interior design...
-2026-05-15 21:33:14,776 - httpx - INFO - HTTP Request: POST https://us-central1-aiplatform.googleapis.com/v1/projects/project-ac920b8b-9938-4e81-b93/locations/us-central1/publishers/google/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
-2026-05-15 21:33:14,782 - app.agents.base - INFO - [Dining_roomAgent] Generated Modern Dining Room at (1.75, 3.0) with wall_anchor support
-2026-05-15 21:33:14,782 - app.agents.base - INFO - [ArchitectAgent] [dining_room_0] Completed
-2026-05-15 21:33:14,782 - app.agents.base - INFO - [ArchitectAgent] [master_bedroom_0] Starting with position (-2.0, 2.75)...
-2026-05-15 21:33:14,783 - root - INFO - [BEDROOM_AGENT_DEBUG] Received args: brief=project_id=None project_type=<ProjectType.RESIDENTIAL: 'residential'> residential_type=None title='Rumah Keluarga Bandung' description='' requirements=[] desired_features=['Bandung, Indonesia'] constraints=['entrance_position: front_center', 'kitchen_location: rear', 'master_bedroom_location: rear_corner'] budget_range=None target_completion=None style_preference='modern' floor_count=2 approximate_area=None room_requirements={'living_room': RoomRequirement(count=1, min_area_m2=20.0, max_area_m2=None, features=[]), 'dining_room': RoomRequirement(count=1, min_area_m2=14.0, max_area_m2=None, features=[]), 'kitchen': RoomRequirement(count=1, min_area_m2=9.0, max_area_m2=None, features=[]), 'bedroom': RoomRequirement(count=2, min_area_m2=10.5, max_area_m2=None, features=[]), 'master_bedroom': RoomRequirement(count=1, min_area_m2=18.0, max_area_m2=None, features=[]), 'bathroom': RoomRequirement(count=2, min_area_m2=4.0, max_area_m2=None, features=[])} notes=[] architectural_params=ArchitecturalParameters(floor_height_ground=3.5, floor_height_upper=3.2, floor_to_ceiling=3.0, slab_thickness=0.15, wall_thickness_exterior=0.3, wall_thickness_interior=0.2, roof_overhang=0.6, roof_thickness=0.15, room_width=3.25, room_length=3.6666666666666665, corridor_width=1.2, staircase_width=1.2, building_width=4.0, building_depth=5.0, foundation_type='shallow', structural_system='frame') site_params=SiteParameters(plot_area=150.0, plot_width=8.0, plot_length=10.0, orientation=None, topography=None, soil_type=None, access_direction=None, setback_front=2.0, setback_back=3.0, setback_left=2.0, setback_right=2.0), context_keys=['specification', 'project_brief', 'environment_context', 'ifc_site_parameters', 'layout_spec', 'arch_params', 'materials', 'roof', 'layout_optimization', 'floors_data', 'wall_bounds_by_space', 'layout_config', 'target_floor', '_layout_space_type'], position={'center_x': -2.0, 'center_y': 2.75, 'floor_number': 2, 'wall_bounds': {'floor_number': 2, 'center_x': 2.5, 'center_y': 2.75, 'width': 3.0, 'length': 3.5, 'bounds': {'north': 4.5, 'south': 1.0, 'east': 4.0, 'west': 1.0}, 'relative': {'north_offset': 0.0, 'south_offset': 0.0, 'east_offset': 0.0, 'west_offset': 0.0}}}, dimensions={'width_m': 4.0, 'length_m': 4.5, 'height_m': 3.5}
-2026-05-15 21:33:14,784 - app.agents.base - INFO - [BedroomAgent] Calling LLM for Kamar Tidur 0 interior design...
-2026-05-15 21:33:18,641 - httpx - INFO - HTTP Request: POST https://us-central1-aiplatform.googleapis.com/v1/projects/project-ac920b8b-9938-4e81-b93/locations/us-central1/publishers/google/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
-2026-05-15 21:33:18,643 - app.agents.base - INFO - [Living_roomAgent] Generated Ruang Tamu at (-2.0, 2.5) with wall_anchor support
-2026-05-15 21:33:18,643 - app.agents.base - INFO - [ArchitectAgent] [living_room_0] Completed
-2026-05-15 21:33:18,643 - app.agents.base - INFO - [ArchitectAgent] [bathroom_0] Starting with position (-3.0, -3.0)...
-2026-05-15 21:33:18,643 - app.agents.base - INFO - [BathroomAgent] Calling LLM for Kamar Mandi 0 design...
-2026-05-15 21:33:25,650 - httpx - INFO - HTTP Request: POST https://us-central1-aiplatform.googleapis.com/v1/projects/project-ac920b8b-9938-4e81-b93/locations/us-central1/publishers/google/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
-2026-05-15 21:33:25,651 - app.agents.base - INFO - [KitchenAgent] LLM response received for Dapur
-2026-05-15 21:33:25,651 - app.agents.base - INFO - [KitchenAgent] Generated Dapur at (2.0, -0.5) with wall_anchor support
-2026-05-15 21:33:25,652 - app.agents.base - INFO - [ArchitectAgent] [kitchen_0] Completed
-2026-05-15 21:33:25,652 - app.agents.base - INFO - [ArchitectAgent] [bathroom_1] Starting with position (-0.5, -3.0)...
-2026-05-15 21:33:25,652 - app.agents.base - INFO - [BathroomAgent_1] Calling LLM for Kamar Mandi 1 design...
-2026-05-15 21:33:29,030 - httpx - INFO - HTTP Request: POST https://us-central1-aiplatform.googleapis.com/v1/projects/project-ac920b8b-9938-4e81-b93/locations/us-central1/publishers/google/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
-2026-05-15 21:33:29,034 - app.agents.base - INFO - [BedroomAgent_1] LLM response received for Kamar Tidur 1
-2026-05-15 21:33:29,034 - app.agents.base - INFO - [BedroomAgent_1] Generated Kamar Tidur 1 at (2.5, -2.75) with wall_anchor support
-2026-05-15 21:33:29,034 - app.agents.base - INFO - [ArchitectAgent] [bedroom_1] Completed
-2026-05-15 21:33:42,239 - httpx - INFO - HTTP Request: POST https://us-central1-aiplatform.googleapis.com/v1/projects/project-ac920b8b-9938-4e81-b93/locations/us-central1/publishers/google/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
-2026-05-15 21:33:42,241 - app.agents.base - INFO - [BedroomAgent] LLM response received for Kamar Tidur 0
-2026-05-15 21:33:42,241 - app.agents.base - INFO - [BedroomAgent] Generated Kamar Tidur 0 at (2.5, 2.75) with wall_anchor support
-2026-05-15 21:33:42,242 - app.agents.base - INFO - [ArchitectAgent] [bedroom_0] Completed
-2026-05-15 21:33:58,520 - httpx - INFO - HTTP Request: POST https://us-central1-aiplatform.googleapis.com/v1/projects/project-ac920b8b-9938-4e81-b93/locations/us-central1/publishers/google/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
-2026-05-15 21:34:04,051 - httpx - INFO - HTTP Request: POST https://us-central1-aiplatform.googleapis.com/v1/projects/project-ac920b8b-9938-4e81-b93/locations/us-central1/publishers/google/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
-2026-05-15 21:34:04,056 - app.agents.base - INFO - [BathroomAgent_1] Generated Kamar Mandi at (-0.5, -3.0) with wall_anchor support
-2026-05-15 21:34:04,057 - app.agents.base - INFO - [ArchitectAgent] [bathroom_1] Completed
-2026-05-15 21:34:06,067 - httpx - INFO - HTTP Request: POST https://us-central1-aiplatform.googleapis.com/v1/projects/project-ac920b8b-9938-4e81-b93/locations/us-central1/publishers/google/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
-2026-05-15 21:34:45,318 - httpx - INFO - HTTP Request: POST https://us-central1-aiplatform.googleapis.com/v1/projects/project-ac920b8b-9938-4e81-b93/locations/us-central1/publishers/google/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
-2026-05-15 21:34:46,546 - httpx - INFO - HTTP Request: POST https://us-central1-aiplatform.googleapis.com/v1/projects/project-ac920b8b-9938-4e81-b93/locations/us-central1/publishers/google/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
-2026-05-15 21:34:46,555 - app.agents.base - INFO - [BathroomAgent] Generated Kamar Mandi Master Tropis Modern at (-3.0, -3.0) with wall_anchor support
-2026-05-15 21:34:46,556 - app.agents.base - INFO - [ArchitectAgent] [bathroom_0] Completed
-2026-05-15 21:35:14,194 - httpx - INFO - HTTP Request: POST https://us-central1-aiplatform.googleapis.com/v1/projects/project-ac920b8b-9938-4e81-b93/locations/us-central1/publishers/google/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
-2026-05-15 21:35:14,200 - app.agents.base - INFO - [BedroomAgent] LLM response received for Kamar Tidur 0
-2026-05-15 21:35:14,200 - app.agents.base - INFO - [BedroomAgent] Generated Kamar Tidur 0 at (-2.0, 2.75) with wall_anchor support
-2026-05-15 21:35:14,200 - app.agents.base - INFO - [ArchitectAgent] [master_bedroom_0] Completed
-2026-05-15 21:35:14,201 - app.agents.base - INFO - [ArchitectAgent] Step 5: Merging space designs with Coordinator Agent...
-2026-05-15 21:35:14,201 - app.agents.base - INFO - [CoordinatorAgent] DEBUG: Generated 2 floors
-2026-05-15 21:35:14,201 - app.agents.base - INFO - [CoordinatorAgent] DEBUG: Floor 1: Ground Floor
-2026-05-15 21:35:14,201 - app.agents.base - INFO - [CoordinatorAgent] DEBUG:   - Height: 3.8m
-2026-05-15 21:35:14,201 - app.agents.base - INFO - [CoordinatorAgent] DEBUG:   - Walls: 24
-2026-05-15 21:35:14,201 - app.agents.base - INFO - [CoordinatorAgent] DEBUG:   - Doors: 1
-2026-05-15 21:35:14,201 - app.agents.base - INFO - [CoordinatorAgent] DEBUG:   - Windows: 0
-2026-05-15 21:35:14,201 - app.agents.base - INFO - [CoordinatorAgent] DEBUG:   - Spaces: 6
-2026-05-15 21:35:14,201 - app.agents.base - INFO - [CoordinatorAgent] DEBUG:   - Wall 0: Wall_Ruang Tamu (interior), start_z=0.0m, end_z=3.3m, height=3.3m
-2026-05-15 21:35:14,201 - app.agents.base - INFO - [CoordinatorAgent] DEBUG:   - Wall 1: Wall_Ruang Tamu (interior), start_z=0.0m, end_z=3.3m, height=3.3m
-2026-05-15 21:35:14,201 - app.agents.base - INFO - [CoordinatorAgent] DEBUG:   - Wall 2: Wall_Ruang Tamu (interior), start_z=0.0m, end_z=3.3m, height=3.3m
-2026-05-15 21:35:14,202 - app.agents.base - INFO - [CoordinatorAgent] DEBUG:   - Door 0: Door_Main_Entrance, center_z=1.65m, wall=Wall_Exterior_South
-2026-05-15 21:35:14,202 - app.agents.base - INFO - [CoordinatorAgent] DEBUG: Floor 2: Floor 2 Floor
-2026-05-15 21:35:14,202 - app.agents.base - INFO - [CoordinatorAgent] DEBUG:   - Height: 3.5m
-2026-05-15 21:35:14,202 - app.agents.base - INFO - [CoordinatorAgent] DEBUG:   - Walls: 12
-2026-05-15 21:35:14,202 - app.agents.base - INFO - [CoordinatorAgent] DEBUG:   - Doors: 0
-2026-05-15 21:35:14,202 - app.agents.base - INFO - [CoordinatorAgent] DEBUG:   - Windows: 0
-2026-05-15 21:35:14,202 - app.agents.base - INFO - [CoordinatorAgent] DEBUG:   - Spaces: 3
-2026-05-15 21:35:14,202 - app.agents.base - INFO - [CoordinatorAgent] DEBUG:   - Wall 0: Wall_Kamar Tidur 0 (interior), start_z=3.8m, end_z=7.1m, height=3.3m
-2026-05-15 21:35:14,202 - app.agents.base - INFO - [CoordinatorAgent] DEBUG:   - Wall 1: Wall_Kamar Tidur 0 (interior), start_z=3.8m, end_z=7.1m, height=3.3m
-2026-05-15 21:35:14,202 - app.agents.base - INFO - [CoordinatorAgent] DEBUG:   - Wall 2: Wall_Kamar Tidur 0 (interior), start_z=3.8m, end_z=7.1m, height=3.3m
-2026-05-15 21:35:14,202 - app.agents.base - INFO - [ArchitectAgent] ArchitectAgent complete: 8 spaces merged
-2026-05-15 21:35:14,203 - app.main - INFO - [TASK] ArchitectAgent completed successfully, progress=90
-2026-05-15 21:35:14,203 - app.main - INFO - [TASK] Running IFCGeometryAgent... task_id=7951e975-5eb3-47ff-8a8f-95ef041eb48c
+2026-05-15 18:51:26,178 - root - INFO - Logging configured. INFO -> info.log, WARNING+ -> error.log
+2026-05-15 18:51:26,178 - app.main - INFO - Starting up with output dir: /root/Arsitektur/service/outputs
+2026-05-15 18:51:26,178 - app.core.agent_registry - INFO - Registered agent: CoordinatorAgent with capabilities: CoordinatorAgent
+2026-05-15 18:51:26,179 - app.core.agent_registry - INFO - Registered agent: ArchitectAgent with capabilities: ArchitectAgent
+2026-05-15 18:51:26,179 - app.core.agent_registry - INFO - Registered agent: IFCGeometryAgentV2 with capabilities: IFCGeometryAgentV2
+2026-05-15 18:51:26,179 - app.core.agent_registry - INFO - Registered agent: RenderAgent with capabilities: RenderAgent
+2026-05-15 18:51:26,179 - app.main - INFO - Registered 4 agents
+2026-05-15 18:51:26,179 - app.main - INFO - ArchitectAgent initialized from registry (with CoordinatorAgent dependency)
+2026-05-15 18:51:26,179 - app.main - INFO - IFCGeometryAgent initialized from registry
+2026-05-15 18:51:26,179 - app.main - INFO - RenderAgent initialized from registry
+2026-05-15 18:51:26,179 - app.main - INFO - Subscribed to agent events for WebSocket broadcasting
+2026-05-15 20:18:13,757 - app.main - INFO - [TASK] Running ArchitectAgent (LLM-driven)... task_id=c28a38b5-f6b1-42db-92dd-b8f4df9721fd
+2026-05-15 20:18:13,757 - app.agents.base - INFO - [ArchitectAgent] Step 1: Converting structured specification to ProjectBrief...
+2026-05-15 20:18:13,758 - app.agents.base - INFO - [ArchitectAgent] Project brief created: Rumah Keluarga Modern, 2 floors, style: modern
+2026-05-15 20:18:13,758 - app.agents.base - INFO - [ArchitectAgent] Step 2: Environment analysis (querying ClimateAPI)...
+2026-05-15 20:18:13,758 - app.agents.environment_agent - INFO - [EnvironmentAgent] Querying climate data for Bandung...
+2026-05-15 20:18:14,688 - httpx - INFO - HTTP Request: GET https://archive-api.open-meteo.com/v1/archive?latitude=-6.9175&longitude=107.6191&start_date=2023-01-01&end_date=2023-12-31&daily=temperature_2m_max%2Ctemperature_2m_min%2Cprecipitation_sum%2Crelative_humidity_2m_mean%2Cwindspeed_10m_mean%2Cshortwave_radiation_sum "HTTP/1.1 200 OK"
+2026-05-15 20:18:14,697 - app.agents.environment_agent - INFO - [EnvironmentAgent] Generating building codes via LLM...

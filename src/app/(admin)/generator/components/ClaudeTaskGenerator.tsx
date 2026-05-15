@@ -45,9 +45,7 @@ export default function ClaudeTaskGenerator({
     const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
 
-    ws.onopen = () => {
-      // Connection successful - happy path
-    };
+    ws.onopen = () => {};
 
     ws.onmessage = (event) => {
       const update = JSON.parse(event.data);

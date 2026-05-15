@@ -69,40 +69,28 @@ export default function Dashboard() {
   const taskWsRef = useRef<Record<string, WebSocket>>({});
 
   const fetchActiveTasks = async () => {
-    try {
-      const response = await fetch(`${API_URL}/api/tasks/active`);
-      const data = await response.json();
-      setActiveTasks(data.tasks || []);
-    } catch (error) {
-      console.error("Error fetching active tasks:", error);
-    }
+    const response = await fetch(`${API_URL}/api/tasks/active`);
+    const data = await response.json();
+    setActiveTasks(data.tasks);
   };
 
   const fetchTaskStats = async () => {
-    try {
-      const response = await fetch(`${API_URL}/api/tasks/stats`);
-      const data = await response.json();
-      setTaskStats(data);
-    } catch (error) {
-      console.error("Error fetching task stats:", error);
-    }
+    const response = await fetch(`${API_URL}/api/tasks/stats`);
+    const data = await response.json();
+    setTaskStats(data);
   };
 
   const fetchRecentTasks = async () => {
-    try {
-      const response = await fetch(`${API_URL}/api/gallery`);
-      const data = await response.json();
-      setRecentTasks(
-        data.map((item: any) => ({
-          id: item.id,
-          status: item.status,
-          progress: item.status === "completed" ? 100 : 0,
-          created_at: item.created_at,
-        })).slice(0, 5)
-      );
-    } catch (error) {
-      console.error("Error fetching gallery:", error);
-    }
+    const response = await fetch(`${API_URL}/api/gallery`);
+    const data = await response.json();
+    setRecentTasks(
+      data.map((item: any) => ({
+        id: item.id,
+        status: item.status,
+        progress: item.status === "completed" ? 100 : 0,
+        created_at: item.created_at,
+      })).slice(0, 5)
+    );
   };
 
   useEffect(() => {
@@ -126,10 +114,6 @@ export default function Dashboard() {
         fetchActiveTasks();
         fetchTaskStats();
       }
-    };
-
-    wsRef.current.onerror = () => {
-      console.warn("WebSocket error for dashboard (will rely on polling)");
     };
 
     return () => {
@@ -247,32 +231,24 @@ export default function Dashboard() {
     taskWsRef.current[task.id] = ws;
 
     ws.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        if (data.agent_statuses) {
-          setSelectedTaskAgents(prev => {
-            const updated = [...prev];
-            Object.entries(data.agent_statuses).forEach(([agentName, agent]: [string, any]) => {
-              const idx = updated.findIndex(a => a.name === agentName);
-              if (idx >= 0) {
-                updated[idx] = {
-                  ...updated[idx],
-                  status: agent.status === "complete" ? "complete" : agent.status === "running" ? "running" : "pending",
-                  progress: agent.progress || 0,
-                  currentAction: agent.current_action || "",
-                };
-              }
-            });
-            return updated;
+      const data = JSON.parse(event.data);
+      if (data.agent_statuses) {
+        setSelectedTaskAgents(prev => {
+          const updated = [...prev];
+          Object.entries(data.agent_statuses).forEach(([agentName, agent]: [string, any]) => {
+            const idx = updated.findIndex(a => a.name === agentName);
+            if (idx >= 0) {
+              updated[idx] = {
+                ...updated[idx],
+                status: agent.status === "complete" ? "complete" : agent.status === "running" ? "running" : "pending",
+                progress: agent.progress || 0,
+                currentAction: agent.current_action || "",
+              };
+            }
           });
-        }
-      } catch (e) {
-        // Ignore parse errors
+          return updated;
+        });
       }
-    };
-
-    ws.onerror = () => {
-      // Silently ignore errors
     };
 
     // Cleanup on unmount
@@ -340,11 +316,6 @@ export default function Dashboard() {
     if (!workflowStatus || (!workflowStatus.completed_agents.length && !workflowStatus.agent_statuses)) {
       return null;
     }
-
-    const allAgents = [
-      ...workflowStatus.completed_agents,
-      ...(workflowStatus.failed_agents || []),
-    ];
 
     // If we have agent_statuses, use that for more detailed info
     if (workflowStatus.agent_statuses) {

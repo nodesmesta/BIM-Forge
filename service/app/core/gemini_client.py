@@ -10,6 +10,7 @@ from .config import settings
 # Get a logger instance
 logger = logging.getLogger(__name__)
 
+
 class GeminiClient:
     def __init__(self, max_retries: int = 3, retry_delay: int = 2):
         self.project_id = settings.project_id
@@ -17,21 +18,37 @@ class GeminiClient:
         self.model = settings.model
         self.max_retries = max_retries
         self.retry_delay = retry_delay
+        # Support API key authentication via GEMINI_API_KEY env var
+        self.api_key = os.environ.get("GEMINI_API_KEY", "")
 
         # Validate configuration
         if not all([self.project_id, self.location, self.model]):
             raise ValueError("Gemini configuration must be set in settings (project_id, location, model)")
 
-        self.base_url = f"https://{self.location}-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{self.location}/publishers/google/models/{self.model}:generateContent"
+        # Use API key endpoint if available, otherwise use gcloud auth
+        if self.api_key:
+            self.base_url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent?key={self.api_key}"
+            self.use_api_key = True
+        else:
+            self.base_url = f"https://{self.location}-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{self.location}/publishers/google/models/{self.model}:generateContent"
+            self.use_api_key = False
 
     async def _make_request(self, payload: Dict[str, Any]) -> Dict[str, Any]:
         """Internal method to make a request with retry logic."""
         last_exception = None
-        access_token = await self._get_access_token()
-        headers = {
-            "Authorization": f"Bearer {access_token}",
-            "Content-Type": "application/json"
-        }
+        
+        # Build headers based on authentication method
+        if self.use_api_key:
+            headers = {
+                "Content-Type": "application/json"
+            }
+            # For API key auth, we don't need Authorization header
+        else:
+            access_token = await self._get_access_token()
+            headers = {
+                "Authorization": f"Bearer {access_token}",
+                "Content-Type": "application/json"
+            }
 
         for attempt in range(self.max_retries):
             try:

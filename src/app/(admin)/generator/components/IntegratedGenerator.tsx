@@ -5,21 +5,45 @@ import StructuredForm from "./StructuredForm";
 import ChatInterface from "./ChatInterface";
 import ClaudeTaskGenerator from "./ClaudeTaskGenerator";
 import StatusTracker from "./StatusTracker";
-import AgentProgressDisplay from "./AgentProgressDisplay";
 import RenderPreview from "./RenderPreview";
 import { AgentFlowTimeline } from "./AgentFlowTimeline";
 import { Task } from "@/types/task";
 import { cn } from "@/lib/utils";
 
+interface Specification {
+  project_name?: string;
+  style?: string;
+  floors?: number[];
+  rooms?: Array<{
+    room_type: string;
+    count: number;
+    min_area_m2: number;
+    preferred_floor: number;
+    exterior_access: boolean;
+    private: boolean;
+  }>;
+  site?: {
+    building_footprint_m2?: number;
+  };
+  total_area_m2?: number;
+  location?: {
+    name?: string;
+    country?: string;
+    latitude?: number;
+    longitude?: number;
+    timezone?: string;
+  };
+}
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 export default function IntegratedGenerator() {
-  const [specification, setSpecification] = useState<any>(null);
+  const [specification, setSpecification] = useState<Specification | null>(null);
   const [task, setTask] = useState<Task | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [inputMode, setInputMode] = useState<"chat" | "form">("chat");
 
-  const handleSpecificationSubmit = (spec: any) => {
+  const handleSpecificationSubmit = (spec: Specification) => {
     setSpecification(spec);
   };
 
@@ -104,7 +128,6 @@ export default function IntegratedGenerator() {
           {task && (
             <>
               <StatusTracker task={task} />
-              <AgentProgressDisplay task={task} />
             </>
           )}
         </div>
@@ -133,7 +156,7 @@ export default function IntegratedGenerator() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600 dark:text-gray-400">Created:</span>
-                  <span>{task.created_at ? new Date(task.created_at).toLocaleString() : "N/A"}</span>
+                  <span>{task.created_at ? new Date(task.created_at).toLocaleString() : ""}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600 dark:text-gray-400">Status:</span>
@@ -182,7 +205,7 @@ export default function IntegratedGenerator() {
             </div>
             <div className="text-center">
               <p className="text-2xl font-bold text-orange-600">
-                {specification.style || "Modern"}
+                {specification.style || ""}
               </p>
               <p className="text-sm text-gray-600 dark:text-gray-400">Style</p>
             </div>

@@ -1,20 +1,12 @@
 "use client";
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, { useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "../context/SidebarContext";
 import {
-  BoxCubeIcon,
-  CalenderIcon,
   GridIcon,
   HorizontaLDots,
-  ListIcon,
-  PageIcon,
-  PieChartIcon,
-  PlugInIcon,
-  TableIcon,
-  UserCircleIcon,
   BoltIcon,
 } from "../icons/index";
 import SidebarWidget from "./SidebarWidget";
@@ -44,74 +36,6 @@ const navItems: NavItem[] = [
     name: "Gallery",
     path: "/gallery",
     new: true,
-  },
-  {
-    icon: <CalenderIcon />,
-    name: "Calendar",
-    path: "/calendar",
-  },
-  {
-    icon: <UserCircleIcon />,
-    name: "Profile",
-    path: "/profile",
-  },
-  {
-    icon: <ListIcon />,
-    name: "Form Elements",
-    path: "/form-elements",
-  },
-  {
-    icon: <TableIcon />,
-    name: "Basic Tables",
-    path: "/basic-tables",
-  },
-  {
-    icon: <PageIcon />,
-    name: "Blank Page",
-    path: "/blank",
-  },
-];
-
-const othersItems: NavItem[] = [
-  {
-    icon: <PieChartIcon />,
-    name: "Line Chart",
-    path: "/line-chart",
-  },
-  {
-    icon: <PieChartIcon />,
-    name: "Bar Chart",
-    path: "/bar-chart",
-  },
-  {
-    icon: <BoxCubeIcon />,
-    name: "Alerts",
-    path: "/alerts",
-  },
-  {
-    icon: <BoxCubeIcon />,
-    name: "Avatars",
-    path: "/avatars",
-  },
-  {
-    icon: <BoxCubeIcon />,
-    name: "Badges",
-    path: "/badge",
-  },
-  {
-    icon: <BoxCubeIcon />,
-    name: "Buttons",
-    path: "/buttons",
-  },
-  {
-    icon: <BoxCubeIcon />,
-    name: "Images",
-    path: "/images",
-  },
-  {
-    icon: <BoxCubeIcon />,
-    name: "Videos",
-    path: "/videos",
   },
 ];
 
@@ -206,39 +130,7 @@ const AppSidebar: React.FC = () => {
       <div className="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">
         <nav className="mb-6">
           <div className="flex flex-col gap-4">
-            <div>
-              <h2
-                className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
-                  !isExpanded && !isHovered
-                    ? "lg:justify-center"
-                    : "justify-start"
-                }`}
-              >
-                {isExpanded || isHovered || isMobileOpen ? (
-                  "Menu"
-                ) : (
-                  <HorizontaLDots />
-                )}
-              </h2>
-              {renderMenuItems(navItems, "main")}
-            </div>
-
-            <div className="">
-              <h2
-                className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
-                  !isExpanded && !isHovered
-                    ? "lg:justify-center"
-                    : "justify-start"
-                }`}
-              >
-                {isExpanded || isHovered || isMobileOpen ? (
-                  "Others"
-                ) : (
-                  <HorizontaLDots />
-                )}
-              </h2>
-              {renderMenuItems(othersItems, "others")}
-            </div>
+            {renderMenuItems(navItems, "main")}
           </div>
         </nav>
         {isExpanded || isHovered || isMobileOpen ? <SidebarWidget /> : null}
