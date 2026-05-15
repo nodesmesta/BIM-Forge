@@ -355,6 +355,34 @@ async def process_task_with_agents(task: Task):
             logger.warning(f"[TASK] Failed to broadcast error: {broadcast_err}")
 
 
+@app.post("/api/webhook/github")
+async def github_webhook(request: dict):
+    """GitHub webhook: auto git pull on push events."""
+    import subprocess, hmac, hashlib
+    import logging
+    logger = logging.getLogger(__name__)
+
+    # Basic validation - check for push event
+    # In production, verify X-Hub-Signature-256 with a webhook secret
+    logger.info(f"Webhook received: ref={request.get('ref', 'unknown')}")
+
+    try:
+        repo_path = "/root/Arsitektur"
+        result = subprocess.run(
+            ["git", "-C", repo_path, "pull", "origin", "main"],
+            capture_output=True, text=True, timeout=30,
+            env={"GIT_SSH_COMMAND": "ssh -o StrictHostKeyChecking=accept-new"}
+        )
+        logger.info(f"Git pull result: {result.stdout.strip()}")
+        if result.returncode != 0:
+            logger.error(f"Git pull failed: {result.stderr}")
+            return {"status": "error", "message": result.stderr}
+        return {"status": "ok", "output": result.stdout.strip()}
+    except Exception as e:
+        logger.error(f"Webhook git pull exception: {e}")
+        return {"status": "error", "message": str(e)}
+
+
 @app.post("/api/generate")
 async def generate(request: StructuredGenerateRequest):
     """Generate building from structured specification only."""
