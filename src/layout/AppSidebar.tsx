@@ -9,7 +9,6 @@ import {
   HorizontaLDots,
   BoltIcon,
 } from "../icons/index";
-import SidebarWidget from "./SidebarWidget";
 
 type NavItem = {
   name: string;
@@ -104,15 +103,15 @@ const AppSidebar: React.FC = () => {
             <>
               <Image
                 className="dark:hidden"
-                src="/images/logo/logo.svg"
-                alt="Logo"
+                src="/images/logo/logo.png"
+                alt="BIM"
                 width={150}
                 height={40}
               />
               <Image
                 className="hidden dark:block"
-                src="/images/logo/logo-dark.svg"
-                alt="Logo"
+                src="/images/logo/logo-dark.png"
+                alt="BIM"
                 width={150}
                 height={40}
               />
@@ -133,7 +132,6 @@ const AppSidebar: React.FC = () => {
             {renderMenuItems(navItems, "main")}
           </div>
         </nav>
-        {isExpanded || isHovered || isMobileOpen ? <SidebarWidget /> : null}
       </div>
     </aside>
   );
