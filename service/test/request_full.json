@@ -1,0 +1,125 @@
+{
+  "prompt": "Rumah minimalis 2 lantai dengan 3 kamar tidur di Bandung, desain modern tropis",
+  "is_structured": true,
+  "specification": {
+    "project_name": "Rumah Keluarga Bandung",
+    "style": "modern",
+    "location": {
+      "name": "Bandung",
+      "country": "Indonesia",
+      "latitude": -6.9175,
+      "longitude": 107.6191,
+      "timezone": "Asia/Jakarta"
+    },
+    "site": {
+      "total_land_area_m2": 150,
+      "building_footprint_m2": 80,
+      "building_width_m": 8,
+      "building_depth_m": 10,
+      "orientation": "north",
+      "setback_north_m": 3,
+      "setback_south_m": 2,
+      "setback_east_m": 2,
+      "setback_west_m": 2
+    },
+    "floors": [
+      {
+        "floor_number": 1,
+        "height_m": 3.5,
+        "ceiling_height_m": 3.0,
+        "slab_thickness_m": 0.15,
+        "purpose": "residential"
+      },
+      {
+        "floor_number": 2,
+        "height_m": 3.2,
+        "ceiling_height_m": 3.0,
+        "slab_thickness_m": 0.15,
+        "purpose": "residential"
+      }
+    ],
+    "rooms": [
+      {
+        "room_type": "living_room",
+        "count": 1,
+        "min_width_m": 4,
+        "min_length_m": 5,
+        "min_area_m2": 20,
+        "preferred_floor": 1,
+        "adjacent_to": ["dining_room"],
+        "exterior_access": true,
+        "private": false
+      },
+      {
+        "room_type": "dining_room",
+        "count": 1,
+        "min_width_m": 3.5,
+        "min_length_m": 4,
+        "min_area_m2": 14,
+        "preferred_floor": 1,
+        "adjacent_to": ["living_room", "kitchen"],
+        "exterior_access": false,
+        "private": false
+      },
+      {
+        "room_type": "kitchen",
+        "count": 1,
+        "min_width_m": 3,
+        "min_length_m": 3,
+        "min_area_m2": 9,
+        "preferred_floor": 1,
+        "adjacent_to": ["dining_room"],
+        "exterior_access": true,
+        "private": false
+      },
+      {
+        "room_type": "bedroom",
+        "count": 2,
+        "min_width_m": 3,
+        "min_length_m": 3.5,
+        "min_area_m2": 10.5,
+        "preferred_floor": 2,
+        "adjacent_to": [],
+        "exterior_access": false,
+        "private": true
+      },
+      {
+        "room_type": "master_bedroom",
+        "count": 1,
+        "min_width_m": 4,
+        "min_length_m": 4.5,
+        "min_area_m2": 18,
+        "preferred_floor": 2,
+        "adjacent_to": [],
+        "exterior_access": false,
+        "private": true
+      },
+      {
+        "room_type": "bathroom",
+        "count": 2,
+        "min_width_m": 2,
+        "min_length_m": 2,
+        "min_area_m2": 4,
+        "preferred_floor": 1,
+        "adjacent_to": ["bedroom", "master_bedroom"],
+        "exterior_access": false,
+        "private": true
+      }
+    ],
+    "circulation": {
+      "corridor_width_m": 1.2,
+      "staircase_width_m": 1.2
+    },
+    "zoning": {
+      "public": ["living_room", "dining_room"],
+      "private": ["bedroom", "master_bedroom"],
+      "service": ["kitchen", "bathroom"]
+    },
+    "constraints": {
+      "entrance_position": "front_center",
+      "kitchen_location": "rear",
+      "master_bedroom_location": "rear_corner"
+    }
+  },
+  "max_revisions": 1
+}

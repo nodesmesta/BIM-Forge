@@ -1,0 +1,17 @@
+fastapi==0.115.0
+uvicorn[standard]==0.29.0
+python-multipart==0.0.17
+pydantic==2.10.4
+pydantic-settings==2.7.0
+redis==5.2.1
+httpx==0.28.1
+trimesh>=4.0.0
+ortools>=9.0.0
+aiofiles==24.1.0
+celery==5.4.0
+websockets==14.1
+python-jose[cryptography]==3.3.0
+python-constraint==1.4.0
+bonsai>=0.8.5
+ifcopenshell==0.8.0
+watchfiles
