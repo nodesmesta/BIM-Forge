@@ -10,6 +10,7 @@ from ..core.gemini_client import GeminiClient
 from ..core.config import settings
 from ..core.space_types import canonical_space_type_key
 from ..core.smart_grid import SmartGridSystem
+from ..core.event_bus import get_event_bus, EventType
 from .base import BaseAgent
 
 
@@ -64,9 +65,23 @@ class CoordinatorAgent(BaseAgent):
         task: Task,
         context: Dict[str, Any]
     ) -> Dict[str, Any]:
+        event_bus = get_event_bus()
         self.log("Generating layout...")
         task.status = TaskStatus.SPEC_GENERATING
         task.progress = 35
+
+        # Publish CoordinatorAgent started
+        await event_bus.publish(
+            EventType.AGENT_STARTED,
+            payload={
+                "task_id": task.id,
+                "agent_name": "CoordinatorAgent",
+                "progress": 35,
+                "phase": "Analyzing requirements",
+                "message": "Coordinator analyzing building requirements"
+            },
+            source_agent="CoordinatorAgent"
+        )
 
         specification = context["specification"]
         project_brief_dict = context["project_brief"]

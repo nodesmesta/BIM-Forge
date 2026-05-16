@@ -6,6 +6,7 @@ from ..models.task import Task, TaskStatus
 from ..core.gemini_client import GeminiClient
 from ..core.ifc_query import IFCQuery
 from ..core.specification_converter import SpecificationConverter
+from ..core.event_bus import get_event_bus, EventType
 from .base import BaseAgent
 from .space_agent_registry import SpaceAgentRegistry
 from .environment_agent import EnvironmentAgent
@@ -91,7 +92,26 @@ class ArchitectAgent(BaseAgent):
         context: Dict[str, Any],
         layout_spec: Dict[str, Any]
     ) -> List[Dict[str, Any]]:
+        event_bus = get_event_bus()
         self.log(f"Spawning {len(agents_config)} space agents with layout...")
+
+        # Broadcast space agents spawning event
+        space_agents_info = [
+            {"name": f"{cfg['type']}_{cfg['instance_id']}", "type": cfg["type"], "floor": cfg["layout_config"]["floor_number"]}
+            for cfg in agents_config
+        ]
+        await event_bus.publish(
+            EventType.AGENT_PROGRESS,
+            payload={
+                "task_id": task.id,
+                "agent_name": "ArchitectAgent",
+                "progress": 70,
+                "phase": "Spawning Space Agents",
+                "message": f"Spawning {len(agents_config)} space agents",
+                "space_agents": space_agents_info
+            },
+            source_agent="ArchitectAgent"
+        )
 
         semaphore = asyncio.Semaphore(5)  # Allow up to 5 agents to run concurrently
 
@@ -105,11 +125,38 @@ class ArchitectAgent(BaseAgent):
 
             agent_name = f"{config['type']}_{config['instance_id']}"
 
+            # Publish space agent started
+            await event_bus.publish(
+                EventType.AGENT_STARTED,
+                payload={
+                    "task_id": task.id,
+                    "agent_name": agent_name,
+                    "progress": 0,
+                    "phase": f"Designing {config['type']}",
+                    "message": f"{agent_name} started on floor {config['layout_config']['floor_number']}"
+                },
+                source_agent=agent_name
+            )
+
             async with semaphore:
                 self.log(f"[{agent_name}] Starting with position ({config['layout_config']['center_x']}, {config['layout_config']['center_y']})...")
                 result = await agent.execute(task, agent_context)
                 self.log(f"[{agent_name}] Completed")
-                return result
+
+            # Publish space agent complete
+            await event_bus.publish(
+                EventType.AGENT_COMPLETE,
+                payload={
+                    "task_id": task.id,
+                    "agent_name": agent_name,
+                    "progress": 100,
+                    "duration": 0,
+                    "message": f"{agent_name} design complete"
+                },
+                source_agent=agent_name
+            )
+
+            return result
 
         tasks = [run_agent(cfg) for cfg in agents_config]
         results = await asyncio.gather(*tasks)

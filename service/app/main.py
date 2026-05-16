@@ -249,7 +249,8 @@ async def process_task_with_agents(task: Task):
 
             context["specification"] = task.metadata["specification"]
 
-            context = await architect_agent.execute(task, context)
+            # Use execute_with_events for automatic event publishing
+            context = await architect_agent.execute_with_events(task, context)
             logger.info(f"[TASK] ArchitectAgent completed successfully, progress={task.progress}")
             task.progress = 90
 
@@ -276,7 +277,7 @@ async def process_task_with_agents(task: Task):
                 source_agent="IFCGeometryAgent"
             )
 
-            context = await ifc_geometry_agent.execute(task, context)
+            context = await ifc_geometry_agent.execute_with_events(task, context)
             logger.info(f"[TASK] IFCGeometryAgent completed successfully")
             task.progress = 95
 
@@ -303,7 +304,7 @@ async def process_task_with_agents(task: Task):
                 source_agent="RenderAgent"
             )
 
-            context = await render_agent.execute(task, context)
+            context = await render_agent.execute_with_events(task, context)
             logger.info(f"[TASK] RenderAgent completed successfully")
             task.progress = 100
 

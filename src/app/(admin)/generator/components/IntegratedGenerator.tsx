@@ -6,7 +6,7 @@ import ChatInterface from "./ChatInterface";
 import ClaudeTaskGenerator from "./ClaudeTaskGenerator";
 import StatusTracker from "./StatusTracker";
 import RenderPreview from "./RenderPreview";
-import { AgentFlowTimeline } from "./AgentFlowTimeline";
+import { PipelineVisualizer } from "./PipelineVisualizer";
 import { Task } from "@/types/task";
 import { cn } from "@/lib/utils";
 
@@ -121,7 +121,7 @@ export default function IntegratedGenerator() {
 
           {/* Agent Flow Timeline (Real-time workflow visualization) */}
           {task && (
-            <AgentFlowTimeline taskId={task.id} task={task} />
+            <PipelineVisualizer taskId={task.id} task={task} />
           )}
 
           {/* Status Trackers */}
