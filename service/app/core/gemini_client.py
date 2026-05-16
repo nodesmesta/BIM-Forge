@@ -34,6 +34,14 @@ class GeminiClient:
             self.use_api_key = False
 
     async def _make_request(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+        """Internal method to make a request with retry logic. Parses response as JSON."""
+        return await self._make_raw_request(payload, parse_json=True)
+
+    async def _make_text_request(self, payload: Dict[str, Any]) -> str:
+        """Make a request and return raw text response (no JSON parsing)."""
+        return await self._make_raw_request(payload, parse_json=False)
+
+    async def _make_raw_request(self, payload: Dict[str, Any], parse_json: bool = True):
         """Internal method to make a request with retry logic."""
         last_exception = None
         
@@ -62,8 +70,10 @@ class GeminiClient:
                     if not text_response:
                         raise ValueError("Empty response from LLM.")
 
-                    # Parse JSON from text response and return on success
-                    return self._extract_json_from_response(text_response)
+                    # Either parse as JSON or return raw text
+                    if parse_json:
+                        return self._extract_json_from_response(text_response)
+                    return text_response
 
             except (httpx.HTTPStatusError, httpx.TimeoutException) as e:
                 logger.warning(f"HTTP error on attempt {attempt + 1}/{self.max_retries}: {e}")

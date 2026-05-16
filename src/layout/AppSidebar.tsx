@@ -28,13 +28,16 @@ const navItems: NavItem[] = [
     icon: <BoltIcon />,
     name: "Generator",
     path: "/generator",
-    new: true,
+  },
+  {
+    icon: <BoltIcon />,
+    name: "Tasks",
+    path: "/tasks",
   },
   {
     icon: <BoltIcon />,
     name: "Gallery",
     path: "/gallery",
-    new: true,
   },
 ];
 

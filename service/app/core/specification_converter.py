@@ -93,8 +93,11 @@ class SpecificationConverter:
         style_preference = style_map[style_lower]
 
         # Convert location
-        location = specification["location"]
-        desired_features = [f"{location['name']}, {location['country']}"]
+        location = specification.get("location")
+        if location:
+            desired_features = [f"{location['name']}, {location['country']}"]
+        else:
+            desired_features = []
 
         # Convert site parameters
         site_params = self._convert_site_params(site)

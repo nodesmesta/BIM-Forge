@@ -424,33 +424,59 @@ async def chatbot_parse(request: dict):
     """
     Chat endpoint: Convert natural language prompt to structured specification.
     
-    This endpoint is used by the frontend chatbot interface.
-    User enters a natural language description, and this returns a complete
-    ProjectSpecification ready for IFC generation.
+    This endpoint supports conversation-based specification building:
+    - First message: Parse initial prompt and identify missing info
+    - Subsequent messages: Update specification based on user responses
+    - Returns clarifying questions if specification is incomplete
+    
+    Request body:
+        - prompt: User's message
+        - session_data: Optional session state from previous responses
+    
+    Returns:
+        - message: Response to show user
+        - is_complete: Whether specification is ready
+        - specification: Complete spec if is_complete=True
+        - parsed_info: Summary of parsed data
+        - session_data: Session state for next turn
+        - needs_questions: Whether we need more info
     """
     prompt = request.get("prompt", "")
+    session_data = request.get("session_data")
     
     if not prompt or not prompt.strip():
         return {
             "success": False,
-            "message": "Prompt tidak boleh kosong. Silakan jelaskan bangunan yang Anda inginkan.",
+            "message": "Please tell me about the building you'd like to create. What's your vision?",
             "specification": None,
-            "parsed_info": None
+            "parsed_info": None,
+            "is_complete": False,
+            "needs_questions": True
         }
     
     try:
         # Use ChatBotAgent to process the prompt
         chatbot = get_chatbot_agent()
-        result = await chatbot.process(prompt)
+        result = await chatbot.process(prompt, session_data)
         
-        return result
+        return {
+            "success": True,
+            "message": result.get("message", ""),
+            "specification": result.get("specification"),
+            "parsed_info": result.get("parsed_info"),
+            "is_complete": result.get("is_complete", False),
+            "needs_questions": result.get("needs_questions", False),
+            "session_data": result.get("session_data")
+        }
         
     except Exception as e:
         return {
             "success": False,
-            "message": f"Terjadi kesalahan: {str(e)}",
+            "message": f"Something went wrong: {str(e)}",
             "specification": None,
-            "parsed_info": None
+            "parsed_info": None,
+            "is_complete": False,
+            "needs_questions": True
         }
 
 

@@ -218,7 +218,7 @@ export default function TaskDetailModal({
                     : "border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
                 )}
               >
-                📋 Details
+                Details
               </button>
               <button
                 onClick={() => setActiveTab("results")}

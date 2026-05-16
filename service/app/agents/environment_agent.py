@@ -85,7 +85,10 @@ class EnvironmentAgent:
         specification = context["specification"]
 
         if isinstance(specification, dict):
-            location = specification["location"]
+            location = specification.get("location")
+            if location is None:
+                # Return empty location dict when location is not provided
+                return {"name": "", "country": "", "latitude": 0.0, "longitude": 0.0}
             return {
                 "name": location["name"],
                 "country": location["country"],
@@ -94,6 +97,9 @@ class EnvironmentAgent:
             }
 
         loc = specification.location
+        if loc is None:
+            # Return empty location dict when location is not provided
+            return {"name": "", "country": "", "latitude": 0.0, "longitude": 0.0}
         return {
             "name": loc.name,
             "country": loc.country,
@@ -150,12 +156,26 @@ Return ONLY a valid JSON object (no markdown, no explanations, no backticks) wit
 
         location = None
         if isinstance(specification, dict):
-            location = specification["location"]
+            location = specification.get("location")
         else:
             location = specification.location
 
         env_context = context["environment_context"]
         building_codes = env_context["building_codes"]
+
+        if location is None:
+            # Return default values when location is not provided
+            return {
+                "name": "",
+                "coordinates": (0.0, 0.0),
+                "elevation": building_codes["elevation_minimum"],
+                "climate_data": {
+                    "climate_zone": env_context["climate_zone"],
+                    "avg_temperature": env_context["temperature"]["annual_avg"],
+                    "rainfall_mm": env_context["rainfall_mm"],
+                    "humidity": env_context["humidity"]
+                }
+            }
 
         return {
             "name": location["name"],
