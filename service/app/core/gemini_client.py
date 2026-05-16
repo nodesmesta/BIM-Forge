@@ -53,7 +53,7 @@ class GeminiClient:
         for attempt in range(self.max_retries):
             try:
                 async with httpx.AsyncClient() as client:
-                    response = await client.post(self.base_url, headers=headers, json=payload, timeout=120.0)
+                    response = await client.post(self.base_url, headers=headers, json=payload, timeout=300.0)
                     response.raise_for_status()
                     response_data = response.json()
 
@@ -89,7 +89,7 @@ class GeminiClient:
 
         payload = {
             "contents": [{
-                "role": "USER",
+                "role": "user",
                 "parts": [{"text": full_prompt}]
             }],
             "generationConfig": {
@@ -122,7 +122,7 @@ Return ONLY valid JSON that matches the schema above, no other text."""
 
         payload = {
             "contents": [{
-                "role": "USER",
+                "role": "user",
                 "parts": [{"text": full_prompt}]
             }],
             "generationConfig": {

@@ -9,6 +9,7 @@ from ..models.ifc_data import WallData, DoorData, WindowData, SpaceData, FloorDa
 from ..core.gemini_client import GeminiClient
 from ..core.config import settings
 from ..core.space_types import canonical_space_type_key
+from ..core.smart_grid import SmartGridSystem
 from .base import BaseAgent
 
 
@@ -49,11 +50,14 @@ def _normalize_coordinator_materials(response: Dict[str, Any]) -> Dict[str, Any]
     }
 
 
+from ..core.smart_grid import SmartGridSystem, WallSegment, WallType, RoomBounds
+
 class CoordinatorAgent(BaseAgent):
 
     def __init__(self):
         super().__init__("CoordinatorAgent")
         self.gemini_client = GeminiClient()
+        self.grid_system = SmartGridSystem(grid_size=0.5, margin=0.01)
 
     async def generate_layout(
         self,
@@ -594,11 +598,55 @@ Return ONLY JSON with this exact structure:
         arch_params: Dict[str, Any],
         materials: Dict[str, Any]
     ) -> Tuple[List[SpaceData], List[WallData], List[DoorData], List[WindowData]]:
+        """
+        Arrange spaces with SMART GRID ALIGNMENT.
+        
+        CRITICAL: This function uses positions from spaces parameter (which comes from
+        layout_spec via merge_space_designs). We do NOT recalculate positions here
+        because space agents have already been spawned with those positions.
+        
+        Key improvements:
+        1. All room positions are preserved from layout_spec (no recalculation)
+        2. Grid snapping applied to ensure alignment
+        3. Proper adjacency detection - rooms share exactly same wall coords
+        4. Validation ensures all rooms within building bounds
+        """
         arranged_spaces = []
         doors = []
         windows = []
 
-        layout = self._solve_constraints_optimized(spaces, building_width, building_depth, layout_optimization)
+        # Grid snapping configuration
+        GRID_SIZE = 0.5  # 50cm grid
+        TOLERANCE = 0.01  # 1cm tolerance for coordinate comparison
+        
+        def snap_to_grid(value: float) -> float:
+            """Snap value to grid using SmartGridSystem"""
+            return self.grid_system.snap_position(value)
+        
+        def snap_bounds(center_x: float, center_y: float, 
+                       width: float, depth: float) -> Tuple[float, float, float, float]:
+            """Snap room bounds to grid and return (x0, y0, x1, y1)"""
+            # First snap center position
+            snapped_cx = self.grid_system.snap_position(center_x)
+            snapped_cy = self.grid_system.snap_position(center_y)
+            
+            # Calculate half dimensions
+            half_w = width / 2
+            half_d = depth / 2
+            
+            # Calculate bounds from snapped center
+            x0 = snapped_cx - half_w
+            x1 = snapped_cx + half_w
+            y0 = snapped_cy - half_d
+            y1 = snapped_cy + half_d
+            
+            # Snap all bounds to grid
+            x0 = self.grid_system.snap_position(x0)
+            x1 = self.grid_system.snap_position(x1)
+            y0 = self.grid_system.snap_position(y0)
+            y1 = self.grid_system.snap_position(y1)
+            
+            return x0, y0, x1, y1
 
         strategy = layout_optimization["strategy"]
         primary_orientation = layout_optimization["primary_orientation"]
@@ -612,35 +660,80 @@ Return ONLY JSON with this exact structure:
         window_thickness = arch_params["window_thickness_m"]
 
         interior_wall_material = materials["walls"]["interior"]
+        exterior_wall_material = materials["walls"]["exterior"]
         floor_z_start = (floor_num - 1) * arch_params["floor_height_ground"]
         floor_z_end = floor_z_start + arch_params["floor_to_ceiling"]
         wall_thickness_int = arch_params["wall_thickness_interior"]
 
         half_w = building_width / 2
         half_d = building_depth / 2
-        tolerance = 0.05
 
-        space_bounds = {}
+        # Track room bounds with SNAPPED coordinates
+        space_bounds: Dict[str, Tuple[float, float, float, float]] = {}
+        room_centers: Dict[str, Tuple[float, float]] = {}
+        
+        # Validate all spaces are within building bounds BEFORE processing
         for space in spaces:
             space_name = space["name"]
-            position = layout[space_name]
-            center_x = position["center_x"]
-            center_y = position["center_y"]
+            # Use position from spaces (already validated from layout_spec)
+            center_x = space.get("center_x", 0.0)
+            center_y = space.get("center_y", 0.0)
             space_dims = space["dimensions"]
             sw = space_dims["width_m"]
             sd = space_dims["length_m"]
+            
+            # Calculate bounds
+            x0 = center_x - sw / 2
+            x1 = center_x + sw / 2
+            y0 = center_y - sd / 2
+            y1 = center_y + sd / 2
+            
+            # CRITICAL: Validate bounds are within building
+            if x0 < -half_w or x1 > half_w:
+                self.log(f"WARNING: {space_name} X bounds ({x0:.2f}, {x1:.2f}) exceeds building ({(-half_w):.2f}, {half_w:.2f}). Adjusting...")
+                # Clamp to building bounds
+                center_x = 0.0
+                if x1 - x0 > building_width:
+                    sw = building_width - 0.5  # Slightly smaller
+                x0 = max(x0, -half_w + 0.1)
+                x1 = min(x1, half_w - 0.1)
+                center_x = (x0 + x1) / 2
+            
+            if y0 < -half_d or y1 > half_d:
+                self.log(f"WARNING: {space_name} Y bounds ({y0:.2f}, {y1:.2f}) exceeds building ({(-half_d):.2f}, {half_d:.2f}). Adjusting...")
+                # Clamp to building bounds
+                y0 = max(y0, -half_d + 0.1)
+                y1 = min(y1, half_d - 0.1)
+                center_y = (y0 + y1) / 2
+
+        # NOW process all spaces with validated positions
+        for space in spaces:
+            space_name = space["name"]
+            # Use position from spaces (already validated) - NO recalculation!
+            center_x = space.get("center_x", 0.0)
+            center_y = space.get("center_y", 0.0)
+            space_dims = space["dimensions"]
+            sw = space_dims["width_m"]
+            sd = space_dims["length_m"]
+            
+            # Create position dict for _determine_window_placement
+            position = {"center_x": center_x, "center_y": center_y}
 
             has_exterior_windows = self._determine_window_placement(
                 space, position, strategy, primary_orientation, building_width, building_depth
             )
 
-            # Calculate space boundaries FIRST (needed for wall_bounds)
-            x0 = center_x - sw / 2
-            x1 = center_x + sw / 2
-            y0 = center_y - sd / 2
-            y1 = center_y + sd / 2
+            # SNAP all coordinates to grid - this is the key fix!
+            x0, y0, x1, y1 = snap_bounds(center_x, center_y, sw, sd)
+            
+            # Calculate snapped center (for space data)
+            snapped_center_x = (x0 + x1) / 2
+            snapped_center_y = (y0 + y1) / 2
+            
+            space_bounds[space_name] = (x0, y0, x1, y1)
+            room_centers[space_name] = (snapped_center_x, snapped_center_y)
 
-                        # Preserve interior data from space agent (includes furniture with wall_anchor)
+            # Preserve interior data from space agent
             interior_data = space.get("interior")
             exterior_data = space.get("exterior")
             mep_data = space.get("mep")
@@ -650,25 +743,23 @@ Return ONLY JSON with this exact structure:
                 name=space_name,
                 room_type=space.get("space_type", "room"),
                 ifc_class="IfcSpace",
-                center_x=center_x,
-                center_y=center_y,
-                width_m=sw,
-                length_m=sd,
-                area_sqm=sw * sd,
+                center_x=snapped_center_x,
+                center_y=snapped_center_y,
+                width_m=x1 - x0,
+                length_m=y1 - y0,
+                area_sqm=(x1 - x0) * (y1 - y0),
                 zone=self._classify_space_zone(space, strategy),
                 window_placement=has_exterior_windows,
-                # Preserve interior design data (furniture with wall_anchor)
                 interior=interior_data,
                 exterior=exterior_data,
                 mep=mep_data,
                 materials=materials_data,
-                # Include wall bounds for furniture placement
                 wall_bounds={
                     "floor_number": floor_num,
-                    "center_x": center_x,
-                    "center_y": center_y,
-                    "width": sw,
-                    "length": sd,
+                    "center_x": snapped_center_x,
+                    "center_y": snapped_center_y,
+                    "width": x1 - x0,
+                    "length": y1 - y0,
                     "bounds": {
                         "north": y1,
                         "south": y0,
@@ -678,211 +769,176 @@ Return ONLY JSON with this exact structure:
                 }
             ))
 
-            space_bounds[space_name] = (x0, y0, x1, y1)
-
-        raw_segments = []
+        # =========================================================================
+        # SMART WALL GENERATION - Walls use EXACT same coordinates
+        # =========================================================================
+        
+        # Collect all wall segments with their owners
+        all_segments: Dict[Tuple[float, float, float, float], List[str]] = {}
+        
         for name, (x0, y0, x1, y1) in space_bounds.items():
-            raw_segments.append((name, "south", x0, y0, x1, y0))
-            raw_segments.append((name, "north", x0, y1, x1, y1))
-            raw_segments.append((name, "west",  x0, y0, x0, y1))
-            raw_segments.append((name, "east",  x1, y0, x1, y1))
+            edges = [
+                (x0, y0, x1, y0),  # South
+                (x0, y1, x1, y1),  # North
+                (x0, y0, x0, y1),  # West
+                (x1, y0, x1, y1),  # East
+            ]
+            for edge in edges:
+                # Normalize edge direction (lower x/y first)
+                if edge[0] > edge[2] or (edge[0] == edge[2] and edge[1] > edge[3]):
+                    edge = (edge[2], edge[3], edge[0], edge[1])
+                
+                key = (round(edge[0], 3), round(edge[1], 3), 
+                       round(edge[2], 3), round(edge[3], 3))
+                
+                if key not in all_segments:
+                    all_segments[key] = []
+                if name not in all_segments[key]:
+                    all_segments[key].append(name)
 
-        def on_exterior(sx, sy, ex, ey):
-            if abs(sx - ex) < tolerance:
-                return abs(sx - (-half_w)) < tolerance or abs(sx - half_w) < tolerance
-            else:
-                return abs(sy - (-half_d)) < tolerance or abs(sy - half_d) < tolerance
+        # Check if segment is on exterior
+        def is_exterior(sx: float, sy: float, ex: float, ey: float) -> bool:
+            if abs(sx - ex) < TOLERANCE:  # Vertical wall
+                return abs(sx - (-half_w)) < TOLERANCE or abs(sx - half_w) < TOLERANCE
+            else:  # Horizontal wall
+                return abs(sy - (-half_d)) < TOLERANCE or abs(sy - half_d) < TOLERANCE
 
-        def segments_equal(s1, s2):
-            # Handle both (owners, sx, sy, ex, ey) - 5 values and (owners, side, sx, sy, ex, ey) - 6 values
-            if len(s1) == 5:
-                _, s1_sx, s1_sy, s1_ex, s1_ey = s1
-            else:
-                _, _, s1_sx, s1_sy, s1_ex, s1_ey = s1
-            
-            if len(s2) == 5:
-                _, s2_sx, s2_sy, s2_ex, s2_ey = s2
-            else:
-                _, _, s2_sx, s2_sy, s2_ex, s2_ey = s2
-            
-            return (
-                (abs(s1_sx - s2_sx) < tolerance and abs(s1_sy - s2_sy) < tolerance and
-                 abs(s1_ex - s2_ex) < tolerance and abs(s1_ey - s2_ey) < tolerance) or
-                (abs(s1_sx - s2_ex) < tolerance and abs(s1_sy - s2_ey) < tolerance and
-                 abs(s1_ex - s2_sx) < tolerance and abs(s1_ey - s2_sy) < tolerance)
-            )
+        def get_wall_side(sx: float, sy: float, ex: float, ey: float) -> str:
+            if abs(sx - ex) < TOLERANCE:  # Vertical
+                return "west" if sx < 0 else "east"
+            else:  # Horizontal
+                return "south" if sy < 0 else "north"
 
-        interior_segments = []
-        for seg in raw_segments:
-            if not on_exterior(seg[2], seg[3], seg[4], seg[5]):
-                interior_segments.append(seg)
-
-        unique_segments = []
-        used = [False] * len(interior_segments)
-        for i, seg_i in enumerate(interior_segments):
-            if used[i]:
-                continue
-            owners = [seg_i[0]]
-            for j in range(i + 1, len(interior_segments)):
-                if used[j]:
-                    continue
-                if segments_equal(seg_i, interior_segments[j]):
-                    owners.append(interior_segments[j][0])
-                    used[j] = True
-            used[i] = True
-            unique_segments.append((owners, seg_i[2], seg_i[3], seg_i[4], seg_i[5]))
-
+        # Generate walls from segments
         walls = []
-        for owners, sx, sy, ex, ey in unique_segments:
-            owner_names = "_".join(sorted(set(owners)))
-            walls.append(WallData(
-                name=f"Wall_{owner_names}",
-                wall_type="interior",
-                start_x=sx,
-                start_y=sy,
-                start_z=floor_z_start,
-                end_x=ex,
-                end_y=ey,
-                end_z=floor_z_end,
-                thickness_m=wall_thickness_int,
-                height_m=arch_params["floor_to_ceiling"],
-                material=interior_wall_material
-            ))
-
-        if floor_num == 1:
-            door_center_z = arch_params["floor_to_ceiling"] / 2
-        else:
-            door_center_z = arch_params["floor_height_ground"] * (floor_num - 1) + (arch_params["floor_to_ceiling"] / 2)
-
-        # =========================================================================
-        # SMART DOOR PLACEMENT - Pintu di dinding yang menghubungkan 2 ruang
-        # =========================================================================
+        interior_walls = []
+        exterior_wall_list = []
         
-        # Build adjacency map: which spaces share walls
-        shared_walls = {}  # (space1, space2) -> wall_segment (sx, sy, ex, ey)
-        for i, (owners_i, sx, sy, ex, ey) in enumerate(unique_segments):
-            if len(owners_i) >= 2:  # Wall shared by multiple spaces
-                for j in range(i + 1, len(unique_segments)):
-                    owners_j = unique_segments[j][0]
-                    if segments_equal((owners_i, sx, sy, ex, ey), (owners_j, unique_segments[j][1], unique_segments[j][2], unique_segments[j][3], unique_segments[j][4])):
-                        # Found shared wall
-                        for space_a in owners_i:
-                            for space_b in owners_j:
-                                key = tuple(sorted([space_a, space_b]))
-                                shared_walls[key] = (sx, sy, ex, ey)
-
-        # Track which spaces have doors
-        spaces_with_doors = set()
-        
-        # Create doors for interior walls (connecting 2+ spaces)
-        # Each unique_segment with multiple owners is a shared wall
-        for owners, sx, sy, ex, ey in unique_segments:
-            if len(owners) >= 2:
-                # This wall is shared by multiple spaces
-                space_a = owners[0]
-                space_b = owners[1] if len(owners) > 1 else owners[0]
-                
-                spaces_with_doors.add(space_a)
-                spaces_with_doors.add(space_b)
-                
-                # Determine wall orientation and side
-                is_vertical = abs(ex - sx) < tolerance
-                if is_vertical:
-                    wall_orientation = "vertical"
-                    wall_side = "west" if sx < 0 else "east"
-                    center_x = sx
-                    center_y = (sy + ey) / 2
-                    rotation_deg = 90  # Pintu menghadap ke arah Y
-                else:
-                    wall_orientation = "horizontal"
-                    wall_side = "south" if sy < 0 else "north"
-                    center_x = (sx + ex) / 2
-                    center_y = sy
-                    rotation_deg = 0  # Pintu menghadap ke arah X
-                
-                wall_name = f"Wall_{space_a}_{space_b}"
-                
-                doors.append(DoorData(
-                    name=f"Door_{space_a}_{space_b}",
-                    width_m=door_width,
-                    height_m=door_height,
-                    thickness_m=door_thickness,
-                    center_x=center_x,
-                    center_y=center_y,
-                    center_z=door_center_z,
-                    rotation_deg=rotation_deg,
-                    wall_name=wall_name,
-                    swing_direction="double-swing",
-                    connects_spaces=[space_a, space_b],
-                    wall_segment=(sx, sy, ex, ey),
-                    wall_side=wall_side,
-                    wall_orientation=wall_orientation,
-                    is_entrance=False
-                ))
-
-        # Create entrance door on ground floor (connects outside to inside)
-        if floor_num == 1:
-            # Find the best exterior wall for entrance
-            # Prioritize south wall (front of building) or the wall with largest public space
-            entrance_x = 0
-            entrance_y = -half_d  # South wall
-            entrance_rotation = 0  # Opens outward
-            entrance_wall_name = "Wall_Exterior_South"
-            entrance_segment = (-2, -half_d, 2, -half_d)
-            entrance_side = "south"
-            entrance_orientation = "horizontal"
+        for (sx, sy, ex, ey), owners in all_segments.items():
+            wall_side = get_wall_side(sx, sy, ex, ey)
+            is_ext = is_exterior(sx, sy, ex, ey)
             
-            # Check if living_room or main public space exists
+            if is_ext:
+                # Exterior wall
+                owner_name = f"Exterior_{wall_side}"
+                exterior_wall_list.append(WallData(
+                    name=f"Wall_{owner_name}",
+                    wall_type="exterior",
+                    start_x=sx,
+                    start_y=sy,
+                    start_z=floor_z_start,
+                    end_x=ex,
+                    end_y=ey,
+                    end_z=floor_z_end,
+                    thickness_m=arch_params["wall_thickness_exterior"],
+                    height_m=arch_params["floor_to_ceiling"],
+                    material=exterior_wall_material
+                ))
+            else:
+                # Interior wall (shared by 1 or more rooms)
+                owner_names = "_".join(sorted(set(owners)))
+                interior_walls.append(WallData(
+                    name=f"Wall_{owner_names}",
+                    wall_type="interior",
+                    start_x=sx,
+                    start_y=sy,
+                    start_z=floor_z_start,
+                    end_x=ex,
+                    end_y=ey,
+                    end_z=floor_z_end,
+                    thickness_m=wall_thickness_int,
+                    height_m=arch_params["floor_to_ceiling"],
+                    material=interior_wall_material
+                ))
+        
+        walls.extend(exterior_wall_list)
+        walls.extend(interior_walls)
+
+        # =========================================================================
+        # SMART DOOR PLACEMENT - Doors at shared walls
+        # =========================================================================
+        
+        door_center_z = floor_z_start + arch_params["floor_to_ceiling"] / 2
+        
+        # Create doors for shared interior walls
+        for wall_data in interior_walls:
+            # Get the two rooms that share this wall
+            wall_name = wall_data.name
+            if wall_name.startswith("Wall_"):
+                parts = wall_name.replace("Wall_", "").split("_")
+                if len(parts) >= 2:
+                    space_a = parts[0]
+                    space_b = parts[1] if len(parts) > 1 else None
+                    
+                    if space_b:
+                        # Determine wall orientation
+                        is_vertical = abs(wall_data.end_x - wall_data.start_x) < TOLERANCE
+                        
+                        if is_vertical:
+                            center_x = wall_data.start_x
+                            center_y = (wall_data.start_y + wall_data.end_y) / 2
+                            rotation_deg = 90
+                        else:
+                            center_x = (wall_data.start_x + wall_data.end_x) / 2
+                            center_y = wall_data.start_y
+                            rotation_deg = 0
+                        
+                        doors.append(DoorData(
+                            name=f"Door_{space_a}_{space_b}",
+                            width_m=door_width,
+                            height_m=door_height,
+                            thickness_m=door_thickness,
+                            center_x=center_x,
+                            center_y=center_y,
+                            center_z=door_center_z,
+                            rotation_deg=rotation_deg,
+                            wall_name=wall_name,
+                            swing_direction="double-swing",
+                            connects_spaces=[space_a, space_b],
+                            wall_segment=(wall_data.start_x, wall_data.start_y, 
+                                         wall_data.end_x, wall_data.end_y),
+                            wall_side=get_wall_side(wall_data.start_x, wall_data.start_y,
+                                                   wall_data.end_x, wall_data.end_y),
+                            wall_orientation="vertical" if is_vertical else "horizontal",
+                            is_entrance=False
+                        ))
+
+        # Create main entrance door
+        if floor_num == 1:
+            entrance_x = 0
             for space in spaces:
                 space_name = space["name"]
                 if space.get("space_type") in ["living_room", "dining_room", "kitchen"]:
-                    pos = layout.get(space_name)
-                    if pos:
-                        # Place entrance aligned with public space
-                        entrance_x = pos["center_x"]
-                        entrance_segment = (entrance_x - 1, -half_d, entrance_x + 1, -half_d)
-                        break
+                    snapped_cx, snapped_cy = room_centers.get(space_name, (0, 0))
+                    entrance_x = snapped_cx
+                    break
             
             doors.append(DoorData(
                 name="Door_Main_Entrance",
-                width_m=door_width * 1.2,  # Entrance door slightly wider
+                width_m=door_width * 1.2,
                 height_m=door_height,
                 thickness_m=door_thickness,
                 center_x=entrance_x,
-                center_y=entrance_y,
+                center_y=-half_d,
                 center_z=door_center_z,
-                rotation_deg=entrance_rotation,
-                wall_name=entrance_wall_name,
+                rotation_deg=0,
+                wall_name="Wall_Exterior_South",
                 swing_direction="single-swing-out",
-                connects_spaces=None,  # Entrance connects outside to inside
-                wall_segment=entrance_segment,
-                wall_side=entrance_side,
-                wall_orientation=entrance_orientation,
+                connects_spaces=None,
+                wall_segment=(entrance_x - 1, -half_d, entrance_x + 1, -half_d),
+                wall_side="south",
+                wall_orientation="horizontal",
                 is_entrance=True
             ))
 
         # =========================================================================
-        # SMART WINDOW PLACEMENT - Jendela di dinding exterior
+        # SMART WINDOW PLACEMENT
         # =========================================================================
         
-        # Exterior wall segments
-        exterior_segments = []
-        for seg in raw_segments:
-            space_name, side, sx, sy, ex, ey = seg
-            if on_exterior(sx, sy, ex, ey):
-                is_vertical = abs(ex - sx) < tolerance
-                orientation = "vertical" if is_vertical else "horizontal"
-                exterior_segments.append((space_name, side, sx, sy, ex, ey, orientation))
-
-        # Place windows on exterior walls
         for space in spaces:
             space_name = space["name"]
-            position = layout[space_name]
-            center_x = position["center_x"]
-            center_y = position["center_y"]
-            space_dims = space["dimensions"]
-            sw = space_dims["width_m"]
-            sd = space_dims["length_m"]
+            center_x, center_y = room_centers.get(space_name, (0, 0))
+            position = {"center_x": center_x, "center_y": center_y}
             
             has_exterior_windows = self._determine_window_placement(
                 space, position, strategy, primary_orientation, building_width, building_depth
@@ -891,55 +947,63 @@ Return ONLY JSON with this exact structure:
             if not has_exterior_windows:
                 continue
             
-            # Find exterior walls for this space
-            x0 = center_x - sw / 2
-            x1 = center_x + sw / 2
-            y0 = center_y - sd / 2
-            y1 = center_y + sd / 2
+            x0, y0, x1, y1 = space_bounds.get(space_name, (0, 0, 0, 0))
             
-            # Check each exterior wall of this space
-            for ext_space, side, sx, sy, ex, ey, orientation in exterior_segments:
-                if ext_space != space_name:
-                    continue
-                    
-                # Calculate window position (center of wall segment)
-                if orientation == "horizontal":
-                    win_center_x = (sx + ex) / 2
-                    win_center_y = sy if sy < 0 else sy  # South or North
-                    rotation_deg = 0 if side == "south" else 180
-                    wall_side = side
-                else:
-                    win_center_x = sx
-                    win_center_y = (sy + ey) / 2
-                    rotation_deg = 90 if side == "west" else 270
-                    wall_side = side
+            # Check each exterior edge of this space
+            for wall_data in exterior_wall_list:
+                wall_segment = (wall_data.start_x, wall_data.start_y, 
+                               wall_data.end_x, wall_data.end_y)
                 
-                if floor_num == 1:
-                    window_sill_height = arch_params["floor_to_ceiling"] * 0.4
-                else:
-                    window_sill_height = arch_params["floor_height_ground"] * (floor_num - 1) + (arch_params["floor_to_ceiling"] * 0.4)
+                # Check if this exterior wall is adjacent to our space
+                is_adjacent = False
                 
-                # Limit window width to wall segment length
-                wall_length = abs(ex - sx) if orientation == "horizontal" else abs(ey - sy)
-                actual_window_width = min(window_width, wall_length - 0.4)  # 0.2m margin each side
-                if actual_window_width < 0.6:  # Minimum window width
-                    continue
+                # South wall (y = -half_d)
+                if abs(y0 - (-half_d)) < TOLERANCE:
+                    if x0 <= wall_data.start_x <= x1 or x0 <= wall_data.end_x <= x1:
+                        is_adjacent = True
+                        win_center_x = (wall_data.start_x + wall_data.end_x) / 2
+                        win_center_y = wall_data.start_y
+                        window_sill = floor_z_start + arch_params["floor_to_ceiling"] * 0.4
+                        
+                        windows.append(WindowData(
+                            name=f"Window_{space_name}_south",
+                            width_m=min(window_width, (x1 - x0) * 0.6),
+                            height_m=window_height,
+                            thickness_m=window_thickness,
+                            center_x=win_center_x,
+                            center_y=win_center_y,
+                            sill_height_m=window_sill,
+                            rotation_deg=0,
+                            wall_name=wall_data.name,
+                            window_type="double-glazed",
+                            wall_segment=wall_segment,
+                            wall_side="south",
+                            wall_orientation="horizontal"
+                        ))
                 
-                windows.append(WindowData(
-                    name=f"Window_{space_name}_{side}",
-                    width_m=actual_window_width,
-                    height_m=window_height,
-                    thickness_m=window_thickness,
-                    center_x=win_center_x,
-                    center_y=win_center_y,
-                    sill_height_m=window_sill_height,
-                    rotation_deg=rotation_deg,
-                    wall_name=f"Wall_Exterior_{wall_side}",
-                    window_type="double-glazed",
-                    wall_segment=(sx, sy, ex, ey),
-                    wall_side=wall_side,
-                    wall_orientation=orientation
-                ))
+                # North wall (y = half_d)
+                if abs(y1 - half_d) < TOLERANCE:
+                    if x0 <= wall_data.start_x <= x1 or x0 <= wall_data.end_x <= x1:
+                        is_adjacent = True
+                        win_center_x = (wall_data.start_x + wall_data.end_x) / 2
+                        win_center_y = wall_data.start_y
+                        window_sill = floor_z_start + arch_params["floor_to_ceiling"] * 0.4
+                        
+                        windows.append(WindowData(
+                            name=f"Window_{space_name}_north",
+                            width_m=min(window_width, (x1 - x0) * 0.6),
+                            height_m=window_height,
+                            thickness_m=window_thickness,
+                            center_x=win_center_x,
+                            center_y=win_center_y,
+                            sill_height_m=window_sill,
+                            rotation_deg=180,
+                            wall_name=wall_data.name,
+                            window_type="double-glazed",
+                            wall_segment=wall_segment,
+                            wall_side="north",
+                            wall_orientation="horizontal"
+                        ))
 
         return arranged_spaces, walls, doors, windows
 

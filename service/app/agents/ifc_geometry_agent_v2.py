@@ -952,16 +952,10 @@ def create_window_with_void(file, geom_context, window_data: WindowData, arch_pa
     )
     window_placement = file.createIfcLocalPlacement(PlacementRelTo=placement_context, RelativePlacement=window_rel_placement)
 
-    # Window type based on window_data
+    # Window type based on window_data — always use valid IFC4 PredefinedType
+    # DOUBLE_GLAZED/SINGLE_GLAZED/TRIPLE_GLAZED are NOT valid IFC4 enums
     window_type = window_data.window_type if window_data.window_type else "double-glazed"
-    if window_type == "double-glazed":
-        predefined_type = "DOUBLE_GLAZED"
-    elif window_type == "single-glazed":
-        predefined_type = "SINGLE_GLAZED"
-    elif window_type == "triple-glazed":
-        predefined_type = "TRIPLE_GLAZED"
-    else:
-        predefined_type = "WINDOW"
+    predefined_type = "WINDOW"  # Only valid IFC4 enum for standard windows
 
     window_name = f"{window_data.wall_side.upper()}_{window_data.name}" if window_data.wall_side else window_data.name
 
@@ -1619,7 +1613,7 @@ def create_exterior_elements(file, geom_context, exterior_data, floor_z, placeme
     for win in windows:
         win_width = win["width_m"]
         win_height = win["height_m"]
-        position = win["position"]
+        position = win.get("position", "south")
 
         ox, oy = _exterior_position_offset(position, space_data.width_m, space_data.length_m)
 
@@ -1672,7 +1666,7 @@ def create_exterior_elements(file, geom_context, exterior_data, floor_z, placeme
     for dr in doors:
         dr_width = dr["width_m"]
         dr_height = dr["height_m"]
-        position = dr["position"]
+        position = dr.get("position", "south")
 
         ox, oy = _exterior_position_offset(position, space_data.width_m, space_data.length_m)
 
