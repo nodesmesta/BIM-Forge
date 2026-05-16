@@ -28,88 +28,88 @@ interface SiteShapeSelectorProps {
 const SITE_SHAPES: SiteShape[] = [
   {
     id: "rectangle",
-    name: "Persegi Panjang",
-    description: "Bentuk standar rumah tinggal",
+    name: "Rectangle",
+    description: "Standard residential building shape",
     type: "rectangle",
     dimensionFields: [
-      { key: "utara", label: "Utara (Depan)", unit: "m", description: "Lebar sisi utara" },
-      { key: "selatan", label: "Selatan (Belakang)", unit: "m", description: "Lebar sisi selatan" },
-      { key: "barat", label: "Barat (Kiri)", unit: "m", description: "Panjang sisi barat" },
-      { key: "timur", label: "Timur (Kanan)", unit: "m", description: "Panjang sisi timur" },
+      { key: "utara", label: "North (Front)", unit: "m", description: "Width of north side" },
+      { key: "selatan", label: "South (Back)", unit: "m", description: "Width of south side" },
+      { key: "barat", label: "West (Left)", unit: "m", description: "Length of west side" },
+      { key: "timur", label: "East (Right)", unit: "m", description: "Length of east side" },
     ],
   },
   {
     id: "square",
-    name: "Persegi",
-    description: "Tanah berbentuk kotak",
+    name: "Square",
+    description: "Land in the shape of a square",
     type: "rectangle",
     dimensionFields: [
-      { key: "sisi", label: "Panjang Sisi", unit: "m", description: "Semua sisi sama panjang" },
+      { key: "sisi", label: "Panjang Sisi", unit: "m", description: "All sides equal length" },
     ],
   },
   {
     id: "trapezoid",
-    name: "Trapezium",
-    description: "Tanah bentuk trapezium (sisi barat tegak lurus)",
+    name: "Trapezoid",
+    description: "Land shaped as a trapezoid (west side perpendicular)",
     type: "trapezoid",
     dimensionFields: [
-      { key: "utara", label: "Utara (Atas)", unit: "m", description: "Lebar sisi utara (atas, sejajar selatan)" },
-      { key: "selatan", label: "Selatan (Bawah)", unit: "m", description: "Lebar sisi selatan (bawah)" },
-      { key: "barat", label: "Barat (Kiri)", unit: "m", description: "Panjang sisi barat (tegak lurus, tinggi)" },
-      { key: "timur", label: "Timur (Kanan)", unit: "m", description: "Panjang sisi timur (miring)" },
+      { key: "utara", label: "North (Top)", unit: "m", description: "Width of north side (atas, sejajar selatan)" },
+      { key: "selatan", label: "South (Bottom)", unit: "m", description: "Width of south side (bawah)" },
+      { key: "barat", label: "West (Left)", unit: "m", description: "Length of west side (tegak lurus, tinggi)" },
+      { key: "timur", label: "East (Right)", unit: "m", description: "Length of east side (miring)" },
     ],
   },
   {
     id: "l-shape",
     name: "L-Shape",
-    description: "Tanah berbentuk L",
+    description: "Land shaped like an L",
     type: "l-shape",
     dimensionFields: [
-      { key: "utara_1", label: "Utara (Bagian 1)", unit: "m", description: "Lebar bagian atas kiri" },
-      { key: "utara_2", label: "Utara (Bagian 2)", unit: "m", description: "Lebar bagian atas kanan" },
-      { key: "selatan", label: "Selatan", unit: "m", description: "Lebar bagian bawah" },
-      { key: "barat", label: "Barat", unit: "m", description: "Panjang sisi barat" },
-      { key: "timur_1", label: "Timur (Bagian 1)", unit: "m", description: "Panjang sisi timur atas" },
-      { key: "timur_2", label: "Timur (Bagian 2)", unit: "m", description: "Panjang sisi timur bawah" },
+      { key: "utara_1", label: "North (Part 1)", unit: "m", description: "Width of upper left part" },
+      { key: "utara_2", label: "North (Part 2)", unit: "m", description: "Width of upper right part" },
+      { key: "selatan", label: "South", unit: "m", description: "Width of bottom part" },
+      { key: "barat", label: "West", unit: "m", description: "Length of west side" },
+      { key: "timur_1", label: "East (Part 1)", unit: "m", description: "Length of east side atas" },
+      { key: "timur_2", label: "East (Part 2)", unit: "m", description: "Length of east side bawah" },
     ],
   },
   {
     id: "triangle",
-    name: "Segitiga",
-    description: "Tanah berbentuk segitiga",
+    name: "Triangle",
+    description: "Land shaped like a triangle",
     type: "triangle",
     dimensionFields: [
-      { key: "utara", label: "Puncak (Utara)", unit: "m", description: "Lebar di puncak (bisa 0 untuk segitiga tajam)" },
-      { key: "selatan", label: "Alas (Selatan)", unit: "m", description: "Lebar alas segitiga" },
-      { key: "barat", label: "Sisi Barat", unit: "m", description: "Panjang sisi kiri" },
-      { key: "timur", label: "Sisi Timur", unit: "m", description: "Panjang sisi kanan" },
+      { key: "utara", label: "Peak (North)", unit: "m", description: "Width at peak (can be 0 for acute triangle)" },
+      { key: "selatan", label: "Alas (South)", unit: "m", description: "Width of triangle base" },
+      { key: "barat", label: "Sisi West", unit: "m", description: "Length of left side" },
+      { key: "timur", label: "East Side", unit: "m", description: "Length of right side" },
     ],
   },
   {
     id: "pentagon",
-    name: "Segi Lima",
-    description: "Tanah berbentuk segi lima",
+    name: "Pentagon",
+    description: "Land shaped like a pentagon",
     type: "polygon",
     dimensionFields: [
-      { key: "sisi_1", label: "Sisi 1 (Utara)", unit: "m", description: "Panjang sisi atas" },
-      { key: "sisi_2", label: "Sisi 2 (Timur Atas)", unit: "m", description: "Panjang sisi kanan atas" },
-      { key: "sisi_3", label: "Sisi 3 (Timur Bawah)", unit: "m", description: "Panjang sisi kanan bawah" },
-      { key: "sisi_4", label: "Sisi 4 (Barat Bawah)", unit: "m", description: "Panjang sisi kiri bawah" },
-      { key: "sisi_5", label: "Sisi 5 (Barat Atas)", unit: "m", description: "Panjang sisi kiri atas" },
+      { key: "sisi_1", label: "Side 1 (North)", unit: "m", description: "Length of top side" },
+      { key: "sisi_2", label: "Side 2 (East Top)", unit: "m", description: "Length of right side atas" },
+      { key: "sisi_3", label: "Side 3 (East Bottom)", unit: "m", description: "Length of right side bawah" },
+      { key: "sisi_4", label: "Side 4 (West Bawah)", unit: "m", description: "Length of left side bawah" },
+      { key: "sisi_5", label: "Side 5 (West Atas)", unit: "m", description: "Length of left side atas" },
     ],
   },
   {
     id: "hexagon",
-    name: "Segi Enam",
-    description: "Tanah berbentuk segi enam",
+    name: "Hexagon",
+    description: "Land shaped like a hexagon",
     type: "polygon",
     dimensionFields: [
-      { key: "sisi_1", label: "Sisi 1", unit: "m", description: "Panjang sisi 1" },
-      { key: "sisi_2", label: "Sisi 2", unit: "m", description: "Panjang sisi 2" },
-      { key: "sisi_3", label: "Sisi 3", unit: "m", description: "Panjang sisi 3" },
-      { key: "sisi_4", label: "Sisi 4", unit: "m", description: "Panjang sisi 4" },
-      { key: "sisi_5", label: "Sisi 5", unit: "m", description: "Panjang sisi 5" },
-      { key: "sisi_6", label: "Sisi 6", unit: "m", description: "Panjang sisi 6" },
+      { key: "sisi_1", label: "Side 1", unit: "m", description: "Length of side 1" },
+      { key: "sisi_2", label: "Side 2", unit: "m", description: "Length of side 2" },
+      { key: "sisi_3", label: "Side 3", unit: "m", description: "Length of side 3" },
+      { key: "sisi_4", label: "Side 4", unit: "m", description: "Length of side 4" },
+      { key: "sisi_5", label: "Side 5", unit: "m", description: "Length of side 5" },
+      { key: "sisi_6", label: "Side 6", unit: "m", description: "Length of side 6" },
     ],
   },
 ];
@@ -201,7 +201,7 @@ function getTrapezoidPoints(d: Record<string, number>): string {
   const barat = d.barat || 9; // Tinggi (tegak lurus)
 
   // Create points with relative dimensions
-  // Barat tegak lurus di kiri
+  // West tegak lurus di kiri
   const points = [
     { x: 0, y: 0 }, // barat-atas (utara-kiri)
     { x: utara, y: 0 }, // utara-kanan
@@ -396,7 +396,7 @@ export default function SiteShapeSelector({
       {/* Shape Selection */}
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Bentuk Tanah
+          Land Shape
         </label>
         <select
           value={selectedShape}
@@ -414,7 +414,7 @@ export default function SiteShapeSelector({
       {/* Dimension Inputs */}
       <div className="border-t pt-4">
         <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-          Dimensi {selected.name}
+          Dimensions {selected.name}
         </h4>
 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -442,7 +442,7 @@ export default function SiteShapeSelector({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Total Luas Tanah (m²) - Dari Sertifikat
+              Total Land Area (m²) - From Certificate
             </label>
             <input
               type="number"
@@ -451,13 +451,13 @@ export default function SiteShapeSelector({
               className="w-full px-3 py-2 rounded border dark:bg-gray-700 dark:border-gray-600"
             />
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              Sesuai sertifikat tanah
+              According to land certificate
             </p>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Estimasi Footprint Bangunan (m²)
+              Estimated Building Footprint (m²)
             </label>
             <input
               type="number"
@@ -466,7 +466,7 @@ export default function SiteShapeSelector({
               className="w-full px-3 py-2 rounded border dark:bg-gray-700 dark:border-gray-600 bg-gray-100 dark:bg-gray-800"
             />
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              Dihitung otomatis dari dimensi yang dimasukkan
+              Calculated automatically from entered dimensions
             </p>
           </div>
         </div>
@@ -475,7 +475,7 @@ export default function SiteShapeSelector({
       {/* Dynamic Visual Preview */}
       <div className="border-t pt-4">
         <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-          Preview Bentuk (Skala Proporsional)
+          Shape Preview (Proportional Scale)
         </h4>
         <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
           <div className="h-40 flex items-center justify-center">
@@ -485,7 +485,7 @@ export default function SiteShapeSelector({
           </div>
           <div className="mt-3 text-center">
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              {selected.name} - Ubah nilai dimensi untuk melihat perubahan bentuk
+              {selected.name} - Change dimension values to see shape changes
             </p>
           </div>
         </div>

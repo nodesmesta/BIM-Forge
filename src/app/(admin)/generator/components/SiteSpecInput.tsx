@@ -231,12 +231,12 @@ export default function SiteSpecInput({ site, onSiteChange }: SiteSpecInputProps
       {/* Setbacks per Side */}
       <div className="border-t pt-4">
         <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-          Setback per Sisi (m)
+          Setback per Side (m)
         </h4>
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">
-              Utara (Depan)
+              North (Front)
             </label>
             <input
               type="number"
@@ -254,7 +254,7 @@ export default function SiteSpecInput({ site, onSiteChange }: SiteSpecInputProps
 
           <div>
             <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">
-              Selatan (Belakang)
+              South (Back)
             </label>
             <input
               type="number"
@@ -272,7 +272,7 @@ export default function SiteSpecInput({ site, onSiteChange }: SiteSpecInputProps
 
           <div>
             <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">
-              Timur
+              East
             </label>
             <input
               type="number"
@@ -290,7 +290,7 @@ export default function SiteSpecInput({ site, onSiteChange }: SiteSpecInputProps
 
           <div>
             <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">
-              Barat
+              West
             </label>
             <input
               type="number"
@@ -311,7 +311,7 @@ export default function SiteSpecInput({ site, onSiteChange }: SiteSpecInputProps
       {/* Orientation */}
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Orientasi Bangunan
+          Building Orientation
         </label>
         <select
           value={site.orientation}
@@ -323,21 +323,21 @@ export default function SiteSpecInput({ site, onSiteChange }: SiteSpecInputProps
           }
           className="w-full px-3 py-2 rounded border dark:bg-gray-700 dark:border-gray-600"
         >
-          <option value="north">Hadap Utara</option>
-          <option value="south">Hadap Selatan</option>
-          <option value="east">Hadap Timur</option>
-          <option value="west">Hadap Barat</option>
-          <option value="north_east">Hadap Utara-Timur</option>
-          <option value="north_west">Hadap Utara-Barat</option>
-          <option value="south_east">Hadap Selatan-Timur</option>
-          <option value="south_west">Hadap Selatan-Barat</option>
+          <option value="north">Facing North</option>
+          <option value="south">Facing South</option>
+          <option value="east">Hadap East</option>
+          <option value="west">Hadap West</option>
+          <option value="north_east">Facing North-East</option>
+          <option value="north_west">Facing North-West</option>
+          <option value="south_east">Facing South-East</option>
+          <option value="south_west">Facing South-West</option>
         </select>
       </div>
 
       {/* Slope Degree */}
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Kemiringan Lahan (°)
+          Land Slope (°)
         </label>
         <input
           type="number"
@@ -354,7 +354,7 @@ export default function SiteSpecInput({ site, onSiteChange }: SiteSpecInputProps
           className="w-full px-3 py-2 rounded border dark:bg-gray-700 dark:border-gray-600"
         />
         <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-          0° = datar, 15° = landai, 30°+ = curam
+          0° = flat, 15° = gentle, 30°+ = steep
         </p>
       </div>
     </div>

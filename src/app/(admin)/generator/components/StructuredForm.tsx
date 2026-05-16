@@ -54,33 +54,33 @@ interface StructuredFormProps {
 }
 
 const ROOM_TYPES = [
-  { value: "living_room", label: "Ruang Tamu" },
-  { value: "dining_room", label: "Ruang Makan" },
-  { value: "kitchen", label: "Dapur" },
-  { value: "bedroom", label: "Kamar Tidur" },
-  { value: "master_bedroom", label: "Kamar Tidur Utama" },
-  { value: "bathroom", label: "Kamar Mandi" },
-  { value: "office", label: "Kantor" },
-  { value: "guest_room", label: "Kamar Tamu" },
-  { value: "laundry", label: "Ruang Cuci" },
-  { value: "storage", label: "Gudang" },
-  { value: "garage", label: "Garasi" },
+  { value: "living_room", label: "Living Room" },
+  { value: "dining_room", label: "Dining Room" },
+  { value: "kitchen", label: "Kitchen" },
+  { value: "bedroom", label: "Bedroom" },
+  { value: "master_bedroom", label: "Master Bedroom" },
+  { value: "bathroom", label: "Bathroom" },
+  { value: "office", label: "Office" },
+  { value: "guest_room", label: "Guest Room" },
+  { value: "laundry", label: "Laundry Room" },
+  { value: "storage", label: "Storage" },
+  { value: "garage", label: "Garage" },
   { value: "carport", label: "Carport" },
 ];
 
 const STYLE_TYPES = [
   { value: "modern", label: "Modern" },
-  { value: "minimalist", label: "Minimalis" },
-  { value: "tropical", label: "Tropis" },
-  { value: "traditional", label: "Tradisional" },
+  { value: "minimalist", label: "Minimalist" },
+  { value: "tropical", label: "Tropical" },
+  { value: "traditional", label: "Traditional" },
   { value: "industrial", label: "Industrial" },
 ];
 
 const ORIENTATIONS = [
-  { value: "north", label: "Utara" },
-  { value: "south", label: "Selatan" },
-  { value: "east", label: "Timur" },
-  { value: "west", label: "Barat" },
+  { value: "north", label: "North" },
+  { value: "south", label: "South" },
+  { value: "east", label: "East" },
+  { value: "west", label: "West" },
 ];
 
 export default function StructuredForm({
@@ -278,7 +278,7 @@ export default function StructuredForm({
               type="text"
               value={projectName}
               onChange={(e) => setProjectName(e.target.value)}
-              placeholder="Rumah Minimalis Modern"
+              placeholder="Modern Minimalist House"
               className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500"
             />
           </div>

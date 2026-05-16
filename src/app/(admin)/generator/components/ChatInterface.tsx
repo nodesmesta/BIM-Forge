@@ -48,7 +48,7 @@ const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: "welcome",
       role: "assistant",
-      content: "Halo! Saya asisten BIM Forge. Saya bisa membantu Anda merancang bangunan, menjawab pertanyaan seputar arsitektur dan BIM, atau sekadar ngobrol.\n\nUntuk mulai mendesain, ceritakan saja bangunan yang Anda inginkan -- misalnya: \"Saya ingin rumah minimalis 2 lantai dengan 3 kamar tidur di Bandung\"",
+      content: "Hi! I am the BIM Forge assistant. I can help you design buildings, answer questions about architecture and BIM, or just chat.\\n\\nTo start designing, just tell me the building you have in mind -- for example: \"I want a minimalist 2-story house with 3 bedrooms in Bandung\"",
     },
   ]);
   const [input, setInput] = useState("");
@@ -94,7 +94,7 @@ const [messages, setMessages] = useState<ChatMessage[]>([
         const assistantMessage: ChatMessage = {
           id: `assistant_${Date.now()}`,
           role: "assistant",
-          content: data.message || "Terjadi kesalahan dalam memproses permintaan Anda.",
+          content: data.message || "An error occurred while processing your request.",
           parsed_info: data.parsed_info,
           specification: data.specification,
           is_complete: data.is_complete,
@@ -212,7 +212,7 @@ const [messages, setMessages] = useState<ChatMessage[]>([
                   <span className="w-2.5 h-2.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
                   <span className="w-2.5 h-2.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
                 </div>
-                <span className="text-sm text-gray-600 dark:text-gray-300">Menganalisis...</span>
+                <span className="text-sm text-gray-600 dark:text-gray-300">Analyzing...</span>
               </div>
             </div>
           </div>
@@ -235,7 +235,7 @@ const [messages, setMessages] = useState<ChatMessage[]>([
                 }
               }
             }}
-            placeholder="Ketik pesan Anda..."
+            placeholder="Type your message..."
             className="flex-1 bg-transparent text-gray-800 dark:text-white text-sm placeholder-gray-400 resize-none outline-none min-h-[24px] max-h-[120px]"
             rows={1}
             disabled={isLoading}
@@ -263,7 +263,7 @@ const [messages, setMessages] = useState<ChatMessage[]>([
           </button>
         </div>
         <p className="text-xs text-gray-400 mt-2 text-center">
-          AI dapat membuat kesalahan. Periksa informasi penting.
+          AI can make mistakes. Consider checking important information.
         </p>
       </div>
     </div>
