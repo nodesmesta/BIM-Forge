@@ -104,7 +104,7 @@ Tugas Anda:
         try:
             # Call Gemini
             response_text = await self.gemini.generate_content(full_prompt)
-            logger.debug(f"Raw response from LLM: {response_text[:200]}...")
+            logger.debug(f"Raw response from LLM: {str(response_text)[:200]}...")
             
             # Attempt to parse JSON strictly — if empty or fails, treat conversation reply as plain text reasonableness
             candidate_json = self._clean_json_extraction(response_text)

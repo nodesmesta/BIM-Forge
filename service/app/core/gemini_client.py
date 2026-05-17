@@ -150,9 +150,8 @@ Return ONLY valid JSON that matches the schema above, no other text."""
                 "parts": [{"text": prompt}]
             }]
         }
-        # Note: This will also return a dict because _make_request is designed for JSON.
-        # The calling function might need adjustment if it expects a raw string.
-        return await self._make_request(payload)
+        # Use _make_text_request to get raw text response
+        return await self._make_text_request(payload)
 
     def _extract_json_from_response(self, text: str) -> Dict[str, Any]:
         """Extract JSON from text response, handling code blocks and other formatting."""
