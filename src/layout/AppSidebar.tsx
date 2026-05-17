@@ -8,6 +8,9 @@ import {
   GridIcon,
   HorizontaLDots,
   BoltIcon,
+  ShootingStarIcon,
+  TaskIcon,
+  PageIcon,
 } from "../icons/index";
 
 type NavItem = {
@@ -25,17 +28,17 @@ const navItems: NavItem[] = [
     path: "/",
   },
   {
-    icon: <BoltIcon />,
+    icon: <ShootingStarIcon />,
     name: "Generator",
     path: "/generator",
   },
   {
-    icon: <BoltIcon />,
+    icon: <TaskIcon />,
     name: "Tasks",
     path: "/tasks",
   },
   {
-    icon: <BoltIcon />,
+    icon: <PageIcon />,
     name: "Gallery",
     path: "/gallery",
   },
@@ -118,6 +121,7 @@ const AppSidebar: React.FC = () => {
                 width={120}
                 height={32}
               />
+              <span className="ml-3 text-sm font-semibold whitespace-nowrap">BIM-Forge</span>
             </>
           ) : (
             <Image
