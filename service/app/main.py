@@ -576,23 +576,7 @@ async def get_status(task_id: str):
             "status": task.status.value,
             "progress": task.progress,
             "result": task.result,
-            "file_path": task.metadata["output_path"]
-        }
-    return {
-        "task_id": task.id,
-        "status": task.status.value,
-        "progress": task.progress,
-        "result": task.result,
-    }
 }
-    "updated_at": task.updated_at.isoformat() if task.updated_at else None,
-        "retry_count": task.retry_count,
-        "revision_number": task.revision_number,
-        "quality_score": task.quality_score,
-        "quality_status": task.quality_status.value if task.quality_status else None,
-        "validation_issues": [issue.model_dump() for issue in task.validation_issues],
-    }
-
 
 @app.get("/api/gallery")
 async def get_gallery():
@@ -604,7 +588,6 @@ async def get_gallery():
         if "_thumb" not in png_file.name:
             task_id = png_file.stem
             task = tasks.get(task_id)
-
             gallery.append({
                 "id": task_id,
                 "thumbnail": f"/api/gallery/{task_id}/thumb",
@@ -615,7 +598,6 @@ async def get_gallery():
             })
 
     return gallery
-
 
 @app.get("/api/gallery/{task_id}")
 async def get_render(task_id: str):
