@@ -404,6 +404,13 @@ async def generate(request: StructuredGenerateRequest):
     # Add structured spec to task metadata for easy access
     task.metadata = {"is_structured": True, "specification": request.specification.dict()}
 
+    # Set absolute path for IFC output
+    from pathlib import Path
+    base_dir = Path(__file__).resolve().parents[2] / "service" / "outputs"
+    base_dir.mkdir(parents=True, exist_ok=True)
+    output_path = base_dir / f"{task_id}.ifc"
+    task.metadata.update({"output_path": str(output_path.resolve())})
+
     tasks[task_id] = task
 
     # Start task processing in background
@@ -416,7 +423,7 @@ async def generate(request: StructuredGenerateRequest):
         "progress": task.progress
     })
 
-    return {"task_id": task_id, "status": "pending"}
+    return {"task_id": task_id, "status": "pending", "output_path_hint": str(output_path.resolve())}
 
 
 @app.post("/api/chatbot")
@@ -563,14 +570,22 @@ async def get_status(task_id: str):
 
     task = tasks[task_id]
 
+    if task.status == TaskStatus.completed and task.metadata and "output_path" in task.metadata:
+        return {
+            "task_id": task.id,
+            "status": task.status.value,
+            "progress": task.progress,
+            "result": task.result,
+            "file_path": task.metadata["output_path"]
+        }
     return {
-        "id": task.id,
+        "task_id": task.id,
         "status": task.status.value,
         "progress": task.progress,
-        "error_message": task.error_message,
         "result": task.result,
-        "created_at": task.created_at.isoformat() if task.created_at else None,
-        "updated_at": task.updated_at.isoformat() if task.updated_at else None,
+    }
+}
+    "updated_at": task.updated_at.isoformat() if task.updated_at else None,
         "retry_count": task.retry_count,
         "revision_number": task.revision_number,
         "quality_score": task.quality_score,
